@@ -119,8 +119,11 @@ Android で、接触確認アプリ(COCOA等)のビーコンを送信するプ�
 
 # 参考先
 
+- [Exposure Notification - Bluetooth Specification](https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ExposureNotification-BluetoothSpecificationv1.2.pdf)
+- [Exposure Notification - Cryptography Specification](https://covid19-static.cdn-apple.com/applications/covid19/current/static/contact-tracing/pdf/ExposureNotification-CryptographySpecificationv1.2.pdf)
 - https://developers.google.com/android/exposure-notifications/exposure-notifications-api
 - https://developer.apple.com/documentation/exposurenotification
+
 
 # License
 
