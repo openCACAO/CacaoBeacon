@@ -15,6 +15,8 @@
 - probetek: json/zip をダウンロードして、内部の TEK を取得するテストプログラム
 - CacaoBeaconMonitor: Android 上で Beacon を受信するプログラム
 - CacaoBeaconSend: Android 上でビーコンを発信するプログラム
+- m5stack/cacaoBeaconServer: M5Stack Basic でビーコンを送信するスケッチ
+- m5stack/cacaoBeaconScan: M5Stack Basic でビーコンを受信するスケッチ
 
 ## probetek
 
