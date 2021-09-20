@@ -52,7 +52,7 @@ void loop(){
     M5.Lcd.fillScreen(BLACK);
     M5.Lcd.setCursor(20,12,6);
     M5.Lcd.println(count);
-    M5.Lcd.setCursor(40,0,2);
+    M5.Lcd.setCursor(20,60,2);
     M5.Lcd.println("COCOA users here");
     for ( auto it = lst.begin(); it != lst.end(); ++it ) {
       M5.Lcd.println( (*it).c_str());
