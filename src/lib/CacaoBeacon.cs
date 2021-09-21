@@ -207,7 +207,7 @@ namespace OpenCacao.CacaoBeacon
             if (tek.Length != 16)
                 throw new ArgumentException($"The length of TEK must be equal 16 bytes.");
 
-#if __ANDROID__
+#if __ANDROID__ || __IOS__
             byte[] HKDF( byte[] ikm, byte[] salt, byte[] info, int len )
             {
                 var hkdf = new AronParker.Hkdf.Hkdf(HashAlgorithmName.SHA256);
