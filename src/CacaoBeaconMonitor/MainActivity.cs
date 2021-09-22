@@ -35,6 +35,8 @@ namespace CacaoBeaconMonitor
 
             Android.Widget.Button btn = FindViewById<Android.Widget.Button>(Resource.Id.button1);
             btn.Click += OnRecvClick;
+            Android.Widget.Button btn2 = FindViewById<Android.Widget.Button>(Resource.Id.button2);
+            btn2.Click += OnDownloadClick;
 
             Android.Widget.ListView listview = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
             _adapter = new BeaconAdapter(this);
@@ -46,8 +48,15 @@ namespace CacaoBeaconMonitor
                     EndTime = DateTime.Now.AddMinutes(10),
                 },
 
-        };
+            };
             listview.Adapter = _adapter;
+
+            Android.Widget.ListView listview2 = FindViewById<Android.Widget.ListView>(Resource.Id.listView2);
+            _adapter_tek = new  TekAdapter(this);
+            _adapter_tek.Items = new List<TEK>();
+            listview2.Adapter = _adapter_tek;
+
+
 
         }
 
@@ -97,12 +106,20 @@ namespace CacaoBeaconMonitor
             var callback = new _ScanCallback();
             callback.eventScanResult += Callback_eventScanResult;
             scanner.StartScan(callback);
+
+            var lv1 = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
+            var lv2 = FindViewById<Android.Widget.ListView>(Resource.Id.listView2);
+            lv1.Visibility = ViewStates.Visible;
+            lv2.Visibility = ViewStates.Invisible;
+
+
         }
 
         List<string> maclist = new List<string>();
         
         public static CBReceiver cbreciever = new CBReceiver();
         BeaconAdapter _adapter;
+        TekAdapter _adapter_tek;
 
         public class BeaconAdapter : Android.Widget.BaseAdapter<RPI>
         {
@@ -222,6 +239,62 @@ namespace CacaoBeaconMonitor
             }
         }
 
+
+        /// <summary>
+        /// TEKのダウンロード
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private async void OnDownloadClick(object sender, EventArgs eventArgs)
+        {
+            var teks = await ExposureNotification.DownloadBatchAsync();
+            _adapter_tek.Items = teks.Take(100).ToList();
+            _adapter_tek.NotifyDataSetChanged();
+
+            var lv1 = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
+            var lv2 = FindViewById<Android.Widget.ListView>(Resource.Id.listView2);
+            lv1.Visibility = ViewStates.Invisible;
+            lv2.Visibility = ViewStates.Visible;
+
+        }
+
+        public class TekAdapter : Android.Widget.BaseAdapter<TEK>
+        {
+            Context _context;
+            LayoutInflater _layoutInflater = null;
+
+            public List<TEK> Items { get; set; } = new List<TEK>();
+            public TekAdapter(Context context)
+            {
+                _context = context;
+                _layoutInflater = _context.GetSystemService(Context.LayoutInflaterService) as LayoutInflater;
+            }
+
+            public override int Count => this.Items.Count;
+            public override TEK this[int position] => this.Items[position];
+            public override long GetItemId(int position)
+            {
+                return position;
+            }
+
+            public override View GetView(int position, View convertView, ViewGroup parent)
+            {
+                View row = convertView;
+                if (row == null)
+                {
+                    row = _layoutInflater.Inflate(Resource.Layout.lvitem, null, false);
+                }
+                var textKey = row.FindViewById<Android.Widget.TextView>(Resource.Id.key);
+                var textStartTime = row.FindViewById<Android.Widget.TextView>(Resource.Id.starttime);
+                var textEndTime = row.FindViewById<Android.Widget.TextView>(Resource.Id.endtime);
+
+                var item = this.Items[position];
+                textKey.Text = BitConverter.ToString(item.Key).Replace("-", "").ToLower();
+                textStartTime.Text = item.Date.ToString();
+                textEndTime.Text = "";
+                return row;
+            }
+        }
     }
 
 }
