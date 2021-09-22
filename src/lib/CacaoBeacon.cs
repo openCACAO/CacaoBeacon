@@ -37,6 +37,8 @@ namespace OpenCacao.CacaoBeacon
     {
         public byte[] Key { get; set; }
         public ulong RollingStartIntervalNumber { get; set; }
+        public int TransmissionRiskLevel { get; set; }
+        public int RollingPeriod { get; set; }
         public DateTime Date
         {
             get
@@ -154,8 +156,8 @@ namespace OpenCacao.CacaoBeacon
     /// </summary>
     public class CBPack
     {
-        public static byte[] RPIKi { get; set; }
-        public static List<byte[]> RPIList = new List<byte[]>();
+        // public static byte[] RPIKi { get; set; }
+        // public static List<byte[]> RPIList = new List<byte[]>();
 
         static byte[] EN_PRIK = stobytes("EN-RPIK");
         static byte[] EN_RPI = stobytes("EN-RPI");
@@ -215,10 +217,10 @@ namespace OpenCacao.CacaoBeacon
                 var actualOkm = hkdf.Expand(actualPrk, len, info);
                 return actualOkm;
             }
-            RPIKi = HKDF(tek, null, EN_PRIK, 16);
+            var RPIKi = HKDF(tek, null, EN_PRIK, 16);
 #else
             // .net5 の場合は HKDF クラスがある
-            RPIKi = HKDF.DeriveKey(HashAlgorithmName.SHA256, tek, 16, null, EN_PRIK);
+            var RPIKi = HKDF.DeriveKey(HashAlgorithmName.SHA256, tek, 16, null, EN_PRIK);
 #endif
 
             int ENINi = (int)rolling_start_interval_number;
@@ -255,14 +257,14 @@ namespace OpenCacao.CacaoBeacon
             };
             byte[] RPIij = AES(PaddedDataj.ToArray());
             // 144分割する
-            RPIList = new List<byte[]>();
+            var lst = new List<byte[]>();
             for (int i = 0; i < 144; i++)
             {
                 byte[] RPIj = RPIij[(16 * i)..(16 * (i + 1))];
                 int ENINj = ENINi + i;
-                RPIList.Add(RPIj);
+                lst.Add(RPIj);
             }
-            return RPIList;
+            return lst;
         }
 
         static byte[] stobytes(string s)

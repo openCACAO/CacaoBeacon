@@ -1,4 +1,5 @@
 ﻿using Google.Protobuf;
+using OpenCacao.CacaoBeacon;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,18 +22,26 @@ namespace probetek
 
             // 指定のZIPをダウンロードして export.bin を取得
             var url = args[0];
+            var data = ExposureNotification.GetExportBin(url);
+            /*
             var cl = new HttpClient();
             var response = cl.GetAsync(url).Result;
             var zipdata = response.Content.ReadAsByteArrayAsync().Result;
-            File.WriteAllBytes("_export.zip", zipdata);
-            var zip = System.IO.Compression.ZipFile.OpenRead("_export.zip");
-            var length = zip.GetEntry("export.bin").Length;
-            var fs = new BinaryReader(zip.GetEntry("export.bin").Open());
-            fs.ReadBytes(12);
-            var data = fs.ReadBytes((int)length - 12);
-            fs.Close();
-            zip.Dispose();
-            System.IO.File.Delete("_export.zip");
+            byte[] data;
+            using (var mem = new MemoryStream(zipdata))
+            {
+                using (var zip = new System.IO.Compression.ZipArchive(mem))
+                {
+                    var length = zip.GetEntry("export.bin").Length;
+                    using (var fs = new BinaryReader(zip.GetEntry("export.bin").Open()))
+                    {
+                        fs.ReadBytes(12);
+                        data = fs.ReadBytes((int)length - 12);
+                    }
+                }
+            }
+            */
+
 
             // "EK Export v1" を読み飛ばし
             // var data = new byte[fs.Length - 12];
@@ -41,6 +50,7 @@ namespace probetek
             // fs.Close();
 
             var teke = TemporaryExposureKeyExport.Parser.ParseFrom(data);
+            List<TEK> teks = ExposureNotification.ConvertTEK(teke);
             Console.WriteLine($"TEK export");
             Console.WriteLine($"StartTimestamp: {teke.StartTimestamp} " +
                 new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(teke.StartTimestamp));
@@ -59,6 +69,15 @@ namespace probetek
             }
             Console.WriteLine($"Keys.Count: {teke.Keys.Count}");
             int n = 1;
+            foreach (TEK tek in teks)
+            {
+                Console.WriteLine($"{n}: " + BitConverter.ToString(tek.Key).Replace("-", "").ToLower());
+                Console.WriteLine($" TransmissionRiskLevel: {tek.TransmissionRiskLevel}");
+                Console.WriteLine($" RollingStartIntervalNumber: {tek.RollingStartIntervalNumber} {tek.Date}");
+                Console.WriteLine($" RollingPeriod: {tek.RollingPeriod}");
+                n++;
+            }
+            /*
             foreach (var tek in teke.Keys)
             {
                 var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(tek.RollingStartIntervalNumber * 600);
@@ -68,6 +87,7 @@ namespace probetek
                 Console.WriteLine($" RollingPeriod: {tek.RollingPeriod}");
                 n++;
             }
+            */
 
 
         }
