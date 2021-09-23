@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
-#if __ANDROID__
+#if __ANDROID__ || __IOS__
 using Newtonsoft.Json;
 #else
 using System.Text.Json;
@@ -31,7 +31,7 @@ namespace OpenCacao.CacaoBeacon
             var cl = new HttpClient();
             var response = await cl.GetAsync(JsonUrl);
             var json = await response.Content.ReadAsStringAsync();
-#if __ANDROID__
+#if __ANDROID__ || __IOS__
             var zips = JsonConvert.DeserializeObject<ZipTekList>(json);
 #else
             var zips = JsonSerializer.Deserialize<ZipTekList>(json);

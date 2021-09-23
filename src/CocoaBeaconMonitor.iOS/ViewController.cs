@@ -16,7 +16,9 @@ namespace CocoaBeaconMonitor.iOS
             // ここでBluetoothの権限を要求する
             this.manager = new CBCentralManager();
             this.manager.DiscoveredPeripheral += Manager_DiscoveredPeripheral;
+            this.manager.UpdatedState += Manager_UpdatedState;
         }
+
 
         /// <summary>
         /// スキャン開始
@@ -25,10 +27,21 @@ namespace CocoaBeaconMonitor.iOS
         /// <param name="e"></param>
         private void Btn_TouchDown(object sender, EventArgs e)
         {
-            if ( this.manager.State == CBCentralManagerState.PoweredOn )
+            if ( this.manager.State == CBCentralManagerState.PoweredOn)
             {
-                this.manager.ScanForPeripherals(this.serviceUUID);
+                this.manager.ScanForPeripherals(
+                    this.serviceUUID, 
+                    new PeripheralScanningOptions() { AllowDuplicatesKey = true }.Dictionary);
             }
+        }
+        /// <summary>
+        /// ステータス変更時
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Manager_UpdatedState(object sender, EventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void Manager_DiscoveredPeripheral(object sender, CBDiscoveredPeripheralEventArgs e)

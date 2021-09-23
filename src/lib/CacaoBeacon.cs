@@ -260,7 +260,17 @@ namespace OpenCacao.CacaoBeacon
             var lst = new List<byte[]>();
             for (int i = 0; i < 144; i++)
             {
+#if __IOS__
+                // byte[] RPIjx = RPIij.AsSpan<byte>(16 * i + 16).ToArray();
+                // 本来これでいいはずだが、ビルドエラーになるので下記で
+                byte[] RPIj = new byte[16];
+                for ( int n=0; n<16; n++ )
+                {
+                    RPIj[n] = RPIij[16 * i + n];
+                }
+#else
                 byte[] RPIj = RPIij[(16 * i)..(16 * (i + 1))];
+#endif
                 int ENINj = ENINi + i;
                 lst.Add(RPIj);
             }
