@@ -26,11 +26,4 @@
         android:layout_height="wrap_content"
         android:id="@+id/listView1" 
         android:layout_below="@id/button2" />
-
-    <ListView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/listView2" 
-        android:layout_below="@id/button2" />
-
 </RelativeLayout>

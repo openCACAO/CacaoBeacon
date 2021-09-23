@@ -51,11 +51,12 @@ namespace CacaoBeaconMonitor
             };
             listview.Adapter = _adapter;
 
+            /*
             Android.Widget.ListView listview2 = FindViewById<Android.Widget.ListView>(Resource.Id.listView2);
             _adapter_tek = new  TekAdapter(this);
             _adapter_tek.Items = new List<TEK>();
             listview2.Adapter = _adapter_tek;
-
+            */
 
 
         }
@@ -107,19 +108,15 @@ namespace CacaoBeaconMonitor
             callback.eventScanResult += Callback_eventScanResult;
             scanner.StartScan(callback);
 
+            _adapter = new BeaconAdapter(this);
             var lv1 = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
-            var lv2 = FindViewById<Android.Widget.ListView>(Resource.Id.listView2);
-            lv1.Visibility = ViewStates.Visible;
-            lv2.Visibility = ViewStates.Invisible;
-
-
+            lv1.Adapter = _adapter;
         }
 
         List<string> maclist = new List<string>();
         
         public static CBReceiver cbreciever = new CBReceiver();
         BeaconAdapter _adapter;
-        TekAdapter _adapter_tek;
 
         public class BeaconAdapter : Android.Widget.BaseAdapter<RPI>
         {
@@ -239,7 +236,6 @@ namespace CacaoBeaconMonitor
             }
         }
 
-
         /// <summary>
         /// TEKのダウンロード
         /// </summary>
@@ -247,15 +243,12 @@ namespace CacaoBeaconMonitor
         /// <param name="eventArgs"></param>
         private async void OnDownloadClick(object sender, EventArgs eventArgs)
         {
+
             var teks = await ExposureNotification.DownloadBatchAsync();
-            _adapter_tek.Items = teks.Take(100).ToList();
-            _adapter_tek.NotifyDataSetChanged();
-
+            var adapter = new TekAdapter(this);
+            adapter.Items = teks.Take(100).ToList();
             var lv1 = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
-            var lv2 = FindViewById<Android.Widget.ListView>(Resource.Id.listView2);
-            lv1.Visibility = ViewStates.Invisible;
-            lv2.Visibility = ViewStates.Visible;
-
+            lv1.Adapter = adapter;
         }
 
         public class TekAdapter : Android.Widget.BaseAdapter<TEK>
