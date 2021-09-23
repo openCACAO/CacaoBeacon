@@ -6,4 +6,8 @@
     <RootNamespace>OpenCacao.CacaoBeacon</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.18.0" />
+  </ItemGroup>
+
 </Project>
