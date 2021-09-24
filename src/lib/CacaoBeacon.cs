@@ -58,6 +58,10 @@ namespace OpenCacao.CacaoBeacon
                     (ulong)(new DateTimeOffset(utc).ToUnixTimeSeconds() / 600);
             }
         }
+        public string ToKeyString()
+        {
+            return BitConverter.ToString(this.Key).Replace("-", "").ToLower();
+        }
     }
 
 

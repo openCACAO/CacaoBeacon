@@ -39,13 +39,26 @@ namespace OpenCacao.CacaoBeacon
 
             foreach ( var zip in zips )
             {
-                var data = GetExportBin(zip.url);
+                var data = await GetExportBin(zip.url);
                 var teke = TemporaryExposureKeyExport.Parser.ParseFrom(data);
                 var teks = ConvertTEK(teke);
                 result.AddRange(teks);
             }
             return result;
         }
+
+        /// <summary>
+        /// ZIPのURLを指定して、TEKのリストを取得する
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static async Task<List<TEK>> DownloadBatchAsync( string url )
+        {
+            byte[] data = await GetExportBin(url);
+            var teke = TemporaryExposureKeyExport.Parser.ParseFrom(data);
+            return ConvertTEK(teke);
+        }
+
 
         /// <summary>
         /// TemporaryExposureKeyExport から List<TEK>に変換
@@ -61,7 +74,9 @@ namespace OpenCacao.CacaoBeacon
                 {
                     Key = tek.KeyData.ToByteArray(),
                     RollingStartIntervalNumber = (ulong)tek.RollingStartIntervalNumber,
+#pragma warning disable CS0612 // 型またはメンバーが旧型式です
                     TransmissionRiskLevel = tek.TransmissionRiskLevel,
+#pragma warning restore CS0612 // 型またはメンバーが旧型式です
                     RollingPeriod = tek.RollingPeriod,
                 });
             }
@@ -73,11 +88,11 @@ namespace OpenCacao.CacaoBeacon
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static byte[] GetExportBin( string url )
+        public static async Task<byte[]> GetExportBin( string url )
         {
             var cl = new HttpClient();
-            var response = cl.GetAsync(url).Result;
-            var zipdata = response.Content.ReadAsByteArrayAsync().Result;
+            var response = await cl.GetAsync(url) ;
+            var zipdata = await response.Content.ReadAsByteArrayAsync() ;
             byte[] data;
             using (var mem = new MemoryStream(zipdata))
             {

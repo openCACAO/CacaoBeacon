@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text.Json;
+using System.Linq;
 
 
 namespace probetek
@@ -19,36 +20,56 @@ namespace probetek
                 displayZipList();
                 return;
             }
+            if (args.Length == 1 && (args[0] == "-a" || args[0] == "--all")) 
+            {
+                displayAllExportBin();
+                return;
+            }
+            if ( args.Length == 1 )
+            {
+                displayExportBin(args[0]);
+                return;
+            }
+            Usage();
+        }
 
-            // 指定のZIPをダウンロードして export.bin を取得
-            var url = args[0];
-            var data = ExposureNotification.GetExportBin(url);
-            /*
+        private static void Usage()
+        {
+            Console.WriteLine(@"
+$ probetek            : list.json を取得し、zip 一覧を表示
+$ probetek [zip-url]  : 指定した zip をダウンロードし、TEK 一覧を表示
+$ probetek [-a|--all] : すべての zip をダウンロードし、TEK 一覧を表示
+
+");
+
+        }
+
+        /// <summary>
+        /// ZIPの一覧を取得
+        /// </summary>
+        private static void displayZipList()
+        {
+            var url = "https://covid19radar-jpn-prod.azureedge.net/c19r/440/list.json";
             var cl = new HttpClient();
             var response = cl.GetAsync(url).Result;
-            var zipdata = response.Content.ReadAsByteArrayAsync().Result;
-            byte[] data;
-            using (var mem = new MemoryStream(zipdata))
+            var json = response.Content.ReadAsStringAsync().Result;
+            var lst = JsonSerializer.Deserialize<ZipTekList>(json);
+            int n = 1;
+            Console.WriteLine($"count: {lst.Count}");
+            foreach (var it in lst)
             {
-                using (var zip = new System.IO.Compression.ZipArchive(mem))
-                {
-                    var length = zip.GetEntry("export.bin").Length;
-                    using (var fs = new BinaryReader(zip.GetEntry("export.bin").Open()))
-                    {
-                        fs.ReadBytes(12);
-                        data = fs.ReadBytes((int)length - 12);
-                    }
-                }
+                Console.WriteLine($"{n:0}: {it.createdDate} {it.url}");
+                n++;
             }
-            */
 
-
-            // "EK Export v1" を読み飛ばし
-            // var data = new byte[fs.Length - 12];
-            // fs.Position = 12;
-            // fs.Read(data);
-            // fs.Close();
-
+        }
+        /// <summary>
+        /// 指定のZIPをダウンロードして export.bin を取得
+        /// </summary>
+        /// <param name="url"></param>
+        private static void displayExportBin( string url )
+        {
+            var data = ExposureNotification.GetExportBin(url).Result;
             var teke = TemporaryExposureKeyExport.Parser.ParseFrom(data);
             List<TEK> teks = ExposureNotification.ConvertTEK(teke);
             Console.WriteLine($"TEK export");
@@ -77,40 +98,43 @@ namespace probetek
                 Console.WriteLine($" RollingPeriod: {tek.RollingPeriod}");
                 n++;
             }
-            /*
-            foreach (var tek in teke.Keys)
-            {
-                var dt = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(tek.RollingStartIntervalNumber * 600);
-                Console.WriteLine($"{n}: " + BitConverter.ToString(tek.KeyData.ToByteArray()).Replace("-", "").ToLower());
-                Console.WriteLine($" TransmissionRiskLevel: {tek.TransmissionRiskLevel}");
-                Console.WriteLine($" RollingStartIntervalNumber: {tek.RollingStartIntervalNumber} {dt}");
-                Console.WriteLine($" RollingPeriod: {tek.RollingPeriod}");
-                n++;
-            }
-            */
-
-
         }
 
         /// <summary>
-        /// ZIPの一覧を取得
+        /// すべてのZIPをダウンロードして export.bin を取得
         /// </summary>
-        private static void displayZipList()
+        /// <param name="url"></param>
+        private static void displayAllExportBin()
         {
             var url = "https://covid19radar-jpn-prod.azureedge.net/c19r/440/list.json";
             var cl = new HttpClient();
             var response = cl.GetAsync(url).Result;
             var json = response.Content.ReadAsStringAsync().Result;
             var lst = JsonSerializer.Deserialize<ZipTekList>(json);
-            int n = 1;
-            Console.WriteLine($"count: {lst.Count}");
+            Console.Write("download zip");
+            List<TEK> teks = new List<TEK>();
             foreach (var it in lst)
             {
-                Console.WriteLine($"{n:0}: {it.createdDate} {it.url}");
-                n++;
+                Console.Write(".");
+                var data = ExposureNotification.GetExportBin(it.url).Result;
+                var teke = TemporaryExposureKeyExport.Parser.ParseFrom(data);
+                teks.AddRange( ExposureNotification.ConvertTEK(teke));
             }
+            Console.WriteLine("");
+            int n = 0;
 
+            /// 時刻でソートする
+            teks = teks.OrderBy(t => t.RollingStartIntervalNumber).ToList();
+            foreach ( var it in teks )
+            {
+                n++;
+                Console.WriteLine($"{n} {it.RollingStartIntervalNumber} {it.Date} {it.ToKeyString()}");
+            }
+            Console.WriteLine($"");
+            Console.WriteLine($"ZIP count is {lst.Count}");
+            Console.WriteLine($"TEK count is {teks.Count}");
         }
+
         partial class ZipTekList : List<ZipTek> { }
         private class ZipTek
         {
