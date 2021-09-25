@@ -69,10 +69,10 @@ namespace CacaoBeacon.Test
             // UTCの正午で rolling_start_interval_number = 0 となる
             utc = new DateTime(utc.Year, utc.Month, utc.Day, 0,0,0, DateTimeKind.Utc);
             var unix = new DateTimeOffset(utc.ToUniversalTime()).ToUnixTimeSeconds();
-            long rolling_start_interval_number = unix / 600;
+            int rolling_start_interval_number = (int)unix / 600;
 
             byte[] rpi = CBPack.getRPI(tek, now);
-            List<byte[]> rpis = CBPack.makeRPIs(tek, (ulong)rolling_start_interval_number );
+            List<byte[]> rpis = CBPack.makeRPIs(tek, rolling_start_interval_number );
             // RPI の場所を比較する
             string rpi_s = BitConverter.ToString(rpi);
             string rpis_s = BitConverter.ToString(rpis[(24-9)*6]);
@@ -93,10 +93,10 @@ namespace CacaoBeacon.Test
             // UTCの正午で rolling_start_interval_number = 0 となる
             utc = new DateTime(utc.Year, utc.Month, utc.Day, 0, 0, 0, DateTimeKind.Utc);
             var unix = new DateTimeOffset(utc.ToUniversalTime()).ToUnixTimeSeconds();
-            long rolling_start_interval_number = unix / 600;
+            int rolling_start_interval_number = (int)unix / 600;
 
             byte[] rpi = CBPack.getRPI(tek, now);
-            List<byte[]> rpis = CBPack.makeRPIs(tek, (ulong)rolling_start_interval_number);
+            List<byte[]> rpis = CBPack.makeRPIs(tek, rolling_start_interval_number);
             // RPI の場所を比較する
             string rpi_s = BitConverter.ToString(rpi);
             string rpis_s = BitConverter.ToString(rpis[0]);

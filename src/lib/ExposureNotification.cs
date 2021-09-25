@@ -73,7 +73,7 @@ namespace OpenCacao.CacaoBeacon
                 result.Add(new TEK()
                 {
                     Key = tek.KeyData.ToByteArray(),
-                    RollingStartIntervalNumber = (ulong)tek.RollingStartIntervalNumber,
+                    RollingStartIntervalNumber = tek.RollingStartIntervalNumber,
 #pragma warning disable CS0612 // 型またはメンバーが旧型式です
                     TransmissionRiskLevel = tek.TransmissionRiskLevel,
 #pragma warning restore CS0612 // 型またはメンバーが旧型式です

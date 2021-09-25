@@ -24,7 +24,6 @@ namespace console
         static void Main(string[] args)
         {
             Console.WriteLine("CacaoBeacon Reciever");
-
             // スキャンモードを設定
             watcher = new BluetoothLEAdvertisementWatcher()
             {
@@ -37,7 +36,6 @@ namespace console
             // キーが押されるまで待つ
             Console.WriteLine("Press any key to continue");
             Console.ReadLine();
-        
         }
 
         private static CBReceiver cbreceiver = new CBReceiver();

@@ -15,8 +15,8 @@ namespace OpenCacao.CacaoBeacon
         public byte[] Key { get; set; }
         public DateTime StartTime { get; set; } // 開始時刻
         public DateTime EndTime { get; set; }   // 終了時刻
-        public short RSSI_min { get; set; }     // 電波強度(dBm) 最小（近い）
-        public short RSSI_max { get; set; }     // 電波強度(dBm) 最大（遠い）
+        public short RSSI_min { get; set; }     // 電波強度(dBm) 最小（遠い）
+        public short RSSI_max { get; set; }     // 電波強度(dBm) 最大（近い）
         public ulong MAC { get; set; }          // MAC アドレス
         public string ToKeyString()
         {
@@ -36,9 +36,15 @@ namespace OpenCacao.CacaoBeacon
     public class TEK
     {
         public byte[] Key { get; set; }
-        public ulong RollingStartIntervalNumber { get; set; }
+        public int RollingStartIntervalNumber { get; set; }
         public int TransmissionRiskLevel { get; set; }
         public int RollingPeriod { get; set; }
+
+#if __ANDROID__ || __IOS__
+        [Newtonsoft.Json.JsonIgnore]
+#else
+        [System.Text.Json.Serialization.JsonIgnore]
+#endif        
         public DateTime Date
         {
             get
@@ -55,7 +61,7 @@ namespace OpenCacao.CacaoBeacon
                 // UTCの正午に正規化する
                 var utc = new DateTime(value.Year, value.Month, value.Day, 0, 0, 0, DateTimeKind.Utc);
                 RollingStartIntervalNumber = 
-                    (ulong)(new DateTimeOffset(utc).ToUnixTimeSeconds() / 600);
+                    (int)(new DateTimeOffset(utc).ToUnixTimeSeconds() / 600);
             }
         }
         public string ToKeyString()
@@ -193,7 +199,7 @@ namespace OpenCacao.CacaoBeacon
                 now = now.ToUniversalTime();
             }
             var today = new DateTime(now.Year, now.Month, now.Day, 0,0,0,DateTimeKind.Utc);
-            ulong rolling_start_interval_number = (ulong)new DateTimeOffset(today).ToUnixTimeSeconds() / 600;
+            int rolling_start_interval_number = (int)new DateTimeOffset(today).ToUnixTimeSeconds() / 600;
             var rpis = makeRPIs( tek, rolling_start_interval_number);
             var n = (int)((now - today).TotalSeconds) / 600;
             return rpis[n];
@@ -206,7 +212,7 @@ namespace OpenCacao.CacaoBeacon
         /// <param name="tek"></param>
         /// <param name="rolling_start_interval_number"></param>
         /// <returns></returns>
-        public static List<byte[]> makeRPIs(byte[] tek, ulong rolling_start_interval_number)
+        public static List<byte[]> makeRPIs(byte[] tek, int rolling_start_interval_number)
         {
             if (tek == null)
                 throw new ArgumentNullException(nameof(tek));
