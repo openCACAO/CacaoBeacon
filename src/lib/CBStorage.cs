@@ -150,5 +150,4 @@ namespace OpenCacao.CacaoBeacon
         }
 
     }
-
 }
