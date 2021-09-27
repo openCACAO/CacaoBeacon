@@ -21,6 +21,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "proto", "proto", "{E5A88168
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CacaoBeaconSend", "CacaoBeaconSend\CacaoBeaconSend.csproj", "{5025BE3D-90A7-49A3-AC7E-7F73BF886EC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeaconMonitor", "BeaconMonitor\BeaconMonitor.csproj", "{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -115,6 +117,18 @@ Global
 		{5025BE3D-90A7-49A3-AC7E-7F73BF886EC8}.Release|x86.ActiveCfg = Release|Any CPU
 		{5025BE3D-90A7-49A3-AC7E-7F73BF886EC8}.Release|x86.Build.0 = Release|Any CPU
 		{5025BE3D-90A7-49A3-AC7E-7F73BF886EC8}.Release|x86.Deploy.0 = Release|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Debug|x64.Build.0 = Debug|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Debug|x86.Build.0 = Debug|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Release|x64.ActiveCfg = Release|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Release|x64.Build.0 = Release|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Release|x86.ActiveCfg = Release|Any CPU
+		{B5BF11B9-D3E2-49B2-BE5D-90F27468F862}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

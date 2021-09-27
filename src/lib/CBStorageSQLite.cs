@@ -13,14 +13,33 @@ namespace OpenCacao.CacaoBeacon
     public class CBStorageSQLite
     {
         public const string PATH_DB = "cacaodb.sqlite3";
-        private static CBContext _context;
+        private CBContext _context;
 
-        public static void Create()
+        public static CBStorageSQLite Create( bool reset = false)
         {
+            if ( reset == false )
+            {
+                CBContext context = CBStorageSQLite.CreateContext();
+                return new CBStorageSQLite() { _context = context };
+            } 
+            else
+            {
+                var o = new CBStorageSQLite();
+                o.Reset();
+                return o;
+            }
+        }
+        
+        public CBStorageSQLite() { 
+            _context = CBStorageSQLite.CreateContext(); 
+        }
+        protected static CBContext CreateContext()
+        {
+            CBContext context;
             if (File.Exists(PATH_DB) == false)
             {
-                _context = new CBContext();
-                _context.Database.ExecuteSqlRaw(@"
+                context = new CBContext();
+                context.Database.ExecuteSqlRaw(@"
 CREATE TABLE RPI (
     ID    INTEGER NOT NULL,
     Key   TEXT NOT NULL,
@@ -43,11 +62,15 @@ CREATE TABLE TEK (
             }
             else
             {
-                _context = new CBContext();
+                context = new CBContext();
             }
+            return context;
         }
 
-        public static void Init()
+        /// <summary>
+        /// ストレージを消去してリセットする
+        /// </summary>
+        public void Reset()
         {
             if ( _context != null )
             {
@@ -58,59 +81,58 @@ CREATE TABLE TEK (
             {
                 System.IO.File.Delete(PATH_DB);
             }
-            // 再作成
-            Create();
-        }
-        public static void InitRPIs()
-        {
-            Init();
-        }
-        public static void InitTEK()
-        {
-            Init();
+            _context = CreateContext();
         }
 
-        public static void AppendRPIs(List<RPI> rpis) 
-        { 
+        /// <summary>
+        /// ひとつのRPIを追加する
+        /// </summary>
+        /// <param name="rpi"></param>
+        public void Add( RPI rpi )
+        {
+            _context.Add(_RPI.ConverFrom(rpi));
+            _context.SaveChanges();
+        }
+        /// <summary>
+        /// 複数のRPIを追加する
+        /// </summary>
+        /// <param name="rpis"></param>
+        public void AddRange(List<RPI> rpis)
+        {
             foreach ( var it in rpis )
             {
-                _context.Add(_RPI.FromRPI(it));
+                _context.Add(_RPI.ConverFrom(it));
             }
             _context.SaveChanges();
         }
-
-        public static List<RPI> LoadRPIs() { 
-            var items = new List<RPI>();
-            foreach ( var it in _context.RPI.ToList())
-            {
-                items.Add(it.ToRPI());
-            }
-            return items;
-        }
-
-        public static void AppendTEK(TEK tek)
+        /// <summary>
+        /// RPIを更新する
+        /// </summary>
+        /// <param name="rpi"></param>
+        public void Update(RPI rpi)
         {
-            _context.Add(_TEK.FromTEK(tek));
-            _context.SaveChanges();
-        }
-        public static void AppendTEK(List<TEK> teks)
-        {
-            foreach (var it in teks)
-            {
-                _context.Add(_TEK.FromTEK(it));
-            }
+            var item = _context.RPI.FirstOrDefault(t => t.Key == rpi.ToKeyString());
+            if (item == null) return;
+            var newitem = _RPI.ConverFrom(rpi);
+            item.EndTime = newitem.EndTime;
+            item.RSSI_max = newitem.RSSI_max;
+            item.RSSI_min = newitem.RSSI_min;
             _context.SaveChanges();
         }
 
-        public static List<TEK> LoadTEK()
+        public List<RPI> RPI
         {
-            var items = new List<TEK>();
-            foreach (var it in _context.TEK.ToList())
+            get
             {
-                items.Add(it.ToTEK());
+                var items = new List<RPI>();
+                foreach (var it in _context.RPI.ToList())
+                {
+                    items.Add(it.ConvertTo());
+                }
+                return items;
             }
-            return items;
         }
+
 
         public class CBContext : DbContext
         {
@@ -142,7 +164,7 @@ CREATE TABLE TEK (
             public int RSSI_max { get; set; }
             public string MAC { get; set; }
 
-            public static _RPI FromRPI(RPI rpi)
+            public static _RPI ConverFrom(RPI rpi)
             {
                 return new _RPI()
                 {
@@ -154,7 +176,7 @@ CREATE TABLE TEK (
                     MAC = rpi.toMacString()
                 };
             }
-            public RPI ToRPI()
+            public RPI ConvertTo()
             {
                 var rpi = new RPI();
 

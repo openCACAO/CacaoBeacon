@@ -74,7 +74,7 @@ namespace OpenCacao.CacaoBeacon
     public class CBReceiver
     {
         public List<RPI> RPIs { get; } = new List<RPI>();
-
+        public CBStorageSQLite Storage { get; set; } = null;
 
         /// <summary>
         /// 受信した RPI を内部で保持する
@@ -96,22 +96,37 @@ namespace OpenCacao.CacaoBeacon
                     it.EndTime = time;
                     if (it.RSSI_min > rssi) it.RSSI_min = rssi;
                     if (it.RSSI_max < rssi) it.RSSI_max = rssi;
+                    this.Storage?.Update(it);
                     return;
                 }
             }
-            this.RPIs.Add(new RPI
+            var item = new RPI
             {
                 Key = rpi,
                 StartTime = time,
-                EndTime = time, 
+                EndTime = time,
                 RSSI_min = rssi,
                 RSSI_max = rssi,
-                MAC = mac ,
-            });
+                MAC = mac,
+            };
+            this.RPIs.Add(item);
+            this.Storage?.Add(item);
         }
         public void Recv(byte[] rpi)
         {
             this.Recv(rpi, DateTime.Now, 0);
+        }
+
+        /// <summary>
+        /// ストレージから復元
+        /// </summary>
+        public void LoadStorage()
+        {
+            if ( this.Storage != null )
+            {
+                this.RPIs.Clear();
+                this.RPIs.AddRange(this.Storage.RPI);
+            }
         }
     }
 
