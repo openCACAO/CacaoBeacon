@@ -40,11 +40,6 @@ namespace OpenCacao.CacaoBeacon
         public int TransmissionRiskLevel { get; set; }
         public int RollingPeriod { get; set; }
 
-#if __ANDROID__ || __IOS__
-        [Newtonsoft.Json.JsonIgnore]
-#else
-        [System.Text.Json.Serialization.JsonIgnore]
-#endif        
         public DateTime Date
         {
             get
@@ -74,7 +69,7 @@ namespace OpenCacao.CacaoBeacon
     public class CBReceiver
     {
         public List<RPI> RPIs { get; } = new List<RPI>();
-        public CBStorageSQLite Storage { get; set; } = null;
+        public CBStorage Storage { get; set; } = null;
 
         /// <summary>
         /// 受信した RPI を内部で保持する
@@ -128,6 +123,45 @@ namespace OpenCacao.CacaoBeacon
                 this.RPIs.AddRange(this.Storage.RPI);
             }
         }
+    }
+
+    /// <summary>
+    /// RPI, TEK を永続化するためのストレージクラス
+    /// </summary>
+    public  abstract class CBStorage
+    {
+        /// <summary>
+        /// ストレージを消去してリセットする
+        /// </summary>
+        public virtual void Reset() { }
+        /// <summary>
+        /// ひとつの RPI を更新する
+        /// </summary>
+        /// <param name="item"></param>
+        public virtual void Update(RPI item) { }
+        /// <summary>
+        /// ひとつの RPI を追加する
+        /// </summary>
+        /// <param name="item"></param>
+        public virtual void Add(RPI item) { }
+        /// <summary>
+        /// 複数の RPI を追加する
+        /// </summary>
+        /// <param name="items"></param>
+        public virtual void AddRange(List<RPI> items) { }
+        /// <summary>
+        /// ひとつの TEK を追加する
+        /// </summary>
+        /// <param name="item"></param>
+        public virtual void Add( TEK item) { }
+        /// <summary>
+        /// ストレージから RPI のリストを取得する
+        /// </summary>
+        public virtual List<RPI> RPI => new List<RPI>();
+        /// <summary>
+        /// ストレージから TEK のリストを取得する
+        /// </summary>
+        public virtual List<TEK> TEK => new List<TEK>();
     }
 
 

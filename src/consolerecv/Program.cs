@@ -24,6 +24,10 @@ namespace console
         static void Main(string[] args)
         {
             Console.WriteLine("CacaoBeacon Reciever");
+            // ストレージからロード
+            cbreceiver.LoadStorage();
+
+
             // スキャンモードを設定
             watcher = new BluetoothLEAdvertisementWatcher()
             {
@@ -38,7 +42,10 @@ namespace console
             Console.ReadLine();
         }
 
-        private static CBReceiver cbreceiver = new CBReceiver();
+        private static CBReceiver cbreceiver = new CBReceiver()
+        {
+            Storage = CBStorageSQLite.Create(),     // ストレージがあれば読み込む
+        };
 
 
         private static void Watcher_Received(

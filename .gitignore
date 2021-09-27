@@ -247,3 +247,4 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+src/consolerecv/cacaodb.sqlite3

@@ -103,6 +103,9 @@ namespace CacaoBeaconMonitor
         /// <param name="eventArgs"></param>
         private void OnRecvClick(object sender, EventArgs eventArgs)
         {
+            cbreciever.LoadStorage();
+
+
             scanner = BluetoothAdapter.DefaultAdapter.BluetoothLeScanner;
             var callback = new _ScanCallback();
             callback.eventScanResult += Callback_eventScanResult;
@@ -114,8 +117,11 @@ namespace CacaoBeaconMonitor
         }
 
         List<string> maclist = new List<string>();
-        
-        public static CBReceiver cbreciever = new CBReceiver();
+
+        public static CBReceiver cbreciever = new CBReceiver()
+        {
+             Storage = new CBStorageSQLite(),
+        };
         BeaconAdapter _adapter;
 
         public class BeaconAdapter : Android.Widget.BaseAdapter<RPI>

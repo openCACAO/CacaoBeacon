@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace OpenCacao.CacaoBeacon
 {
 
-    public class CBStorageSQLite
+    public class CBStorageSQLite : CBStorage
     {
         public const string PATH_DB = "cacaodb.sqlite3";
         private CBContext _context;
@@ -35,8 +35,13 @@ namespace OpenCacao.CacaoBeacon
         }
         protected static CBContext CreateContext()
         {
+#if __ANDROID__
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + PATH_DB;
+#else
+            string path = PATH_DB;
+#endif
             CBContext context;
-            if (File.Exists(PATH_DB) == false)
+            if (File.Exists(path) == false)
             {
                 context = new CBContext();
                 context.Database.ExecuteSqlRaw(@"
@@ -70,16 +75,23 @@ CREATE TABLE TEK (
         /// <summary>
         /// ストレージを消去してリセットする
         /// </summary>
-        public void Reset()
+        public override void Reset()
         {
             if ( _context != null )
             {
                 _context.Dispose();
                 _context = null;
             }
-            if (File.Exists(PATH_DB) == true)
+
+#if __ANDROID__
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + PATH_DB;
+#else
+            string path = PATH_DB;
+#endif
+
+            if (File.Exists(path) == true)
             {
-                System.IO.File.Delete(PATH_DB);
+                System.IO.File.Delete(path);
             }
             _context = CreateContext();
         }
@@ -88,7 +100,7 @@ CREATE TABLE TEK (
         /// ひとつのRPIを追加する
         /// </summary>
         /// <param name="rpi"></param>
-        public void Add( RPI rpi )
+        public override void Add( RPI rpi )
         {
             _context.Add(_RPI.ConverFrom(rpi));
             _context.SaveChanges();
@@ -97,7 +109,7 @@ CREATE TABLE TEK (
         /// 複数のRPIを追加する
         /// </summary>
         /// <param name="rpis"></param>
-        public void AddRange(List<RPI> rpis)
+        public override void AddRange(List<RPI> rpis)
         {
             foreach ( var it in rpis )
             {
@@ -109,7 +121,7 @@ CREATE TABLE TEK (
         /// RPIを更新する
         /// </summary>
         /// <param name="rpi"></param>
-        public void Update(RPI rpi)
+        public override void Update(RPI rpi)
         {
             var item = _context.RPI.FirstOrDefault(t => t.Key == rpi.ToKeyString());
             if (item == null) return;
@@ -120,7 +132,7 @@ CREATE TABLE TEK (
             _context.SaveChanges();
         }
 
-        public List<RPI> RPI
+        public override List<RPI> RPI
         {
             get
             {
@@ -138,7 +150,12 @@ CREATE TABLE TEK (
         {
             protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
             {
-                optionsBuilder.UseSqlite($"Data Source={PATH_DB}");
+#if __ANDROID__
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + PATH_DB;
+#else
+            string path = PATH_DB;
+#endif
+                optionsBuilder.UseSqlite($"Data Source={path}");
             }
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
@@ -193,6 +210,9 @@ CREATE TABLE TEK (
             }
         }
 
+        /// <summary>
+        /// SQLite用のTEK
+        /// </summary>
         public class _TEK
         {
             public int ID { get; set; }

@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\lib\CacaoBeacon.cs" Link="CacaoBeacon.cs" />
+    <ProjectReference Include="..\lib\lib.csproj" />
   </ItemGroup>
 
 </Project>
