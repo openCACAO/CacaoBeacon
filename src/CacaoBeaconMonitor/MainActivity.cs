@@ -13,52 +13,52 @@ using System.Linq;
 using System.Collections.Generic;
 using OpenCacao.CacaoBeacon;
 using Android.Content;
+using Google.Android.Material.Navigation;
+using AndroidX.DrawerLayout.Widget;
+using AndroidX.Core.View;
 
 namespace CacaoBeaconMonitor
 {
     [Activity(Label = "@string/app_name", Theme = "@style/AppTheme.NoActionBar", MainLauncher = true)]
-    public class MainActivity : AppCompatActivity
+    public class MainActivity : AppCompatActivity, NavigationView.IOnNavigationItemSelectedListener
     {
         protected override void OnCreate(Bundle savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
             Xamarin.Essentials.Platform.Init(this, savedInstanceState);
             SetContentView(Resource.Layout.activity_main);
-
+            if (savedInstanceState == null)
+            {
+                var manager = this.SupportFragmentManager;
+                var trans = manager.BeginTransaction();
+                trans.Replace(Resource.Id.container, new MainFragment());
+                trans.Commit();
+            }
             Toolbar toolbar = FindViewById<Toolbar>(Resource.Id.toolbar);
             SetSupportActionBar(toolbar);
 
             this.RequestedOrientation = Android.Content.PM.ScreenOrientation.Portrait;
 
-            FloatingActionButton fab = FindViewById<FloatingActionButton>(Resource.Id.fab);
-            fab.Click += FabOnClick;
+            DrawerLayout drawer = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
+            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, toolbar, Resource.String.navigation_drawer_open, Resource.String.navigation_drawer_close);
+            drawer.AddDrawerListener(toggle);
+            toggle.SyncState();
 
-            Android.Widget.Button btn = FindViewById<Android.Widget.Button>(Resource.Id.button1);
-            btn.Click += OnRecvClick;
-            Android.Widget.Button btn2 = FindViewById<Android.Widget.Button>(Resource.Id.button2);
-            btn2.Click += OnDownloadClick;
+            NavigationView navigationView = FindViewById<NavigationView>(Resource.Id.nav_view);
+            navigationView.SetNavigationItemSelectedListener(this);
 
-            Android.Widget.ListView listview = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
-            _adapter = new BeaconAdapter(this);
-            _adapter.Items = new List<RPI> {
-                new RPI()
-                {
-                    Key = new byte[] { 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, },
-                    StartTime = DateTime.Now,
-                    EndTime = DateTime.Now.AddMinutes(10),
-                },
-
-            };
-            listview.Adapter = _adapter;
-
-            /*
-            Android.Widget.ListView listview2 = FindViewById<Android.Widget.ListView>(Resource.Id.listView2);
-            _adapter_tek = new  TekAdapter(this);
-            _adapter_tek.Items = new List<TEK>();
-            listview2.Adapter = _adapter_tek;
-            */
-
-
+        }
+        public override void OnBackPressed()
+        {
+            DrawerLayout drawer = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
+            if (drawer.IsDrawerOpen(GravityCompat.Start))
+            {
+                drawer.CloseDrawer(GravityCompat.Start);
+            }
+            else
+            {
+                base.OnBackPressed();
+            }
         }
 
         public override bool OnCreateOptionsMenu(IMenu menu)
@@ -93,9 +93,40 @@ namespace CacaoBeaconMonitor
         }
 
 
+        public bool OnNavigationItemSelected(IMenuItem item)
+        {
+            int id = item.ItemId;
 
-        BluetoothLeScanner scanner;
+            AndroidX.Fragment.App.Fragment fragment = null;
 
+            if (id == Resource.Id.nav_home)
+            {
+                fragment = new MainFragment();
+            }
+            else if (id == Resource.Id.nav_scan)
+            {
+                fragment = new ScanFragment();
+            }
+            else if (id == Resource.Id.nav_download)
+            {
+                fragment = new DownloadFragment();
+            }
+
+            if (fragment != null)
+            {
+                var trans = this.SupportFragmentManager.BeginTransaction();
+                trans.Replace(Resource.Id.container, fragment);
+                trans.Commit();
+            }
+
+            DrawerLayout drawer = FindViewById<DrawerLayout>(Resource.Id.drawer_layout);
+            drawer.CloseDrawer(GravityCompat.Start);
+            return true;
+        }
+
+        // BluetoothLeScanner scanner;
+
+        /*
         /// <summary>
         /// スキャン開始
         /// </summary>
@@ -115,7 +146,9 @@ namespace CacaoBeaconMonitor
             var lv1 = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
             lv1.Adapter = _adapter;
         }
+        */
 
+#if false
         List<string> maclist = new List<string>();
 
         public static CBReceiver cbreciever = new CBReceiver()
@@ -294,6 +327,7 @@ namespace CacaoBeaconMonitor
                 return row;
             }
         }
+#endif
     }
 
 }
