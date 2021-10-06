@@ -14,6 +14,7 @@ using System.Linq;
 using System.Text;
 using Environment = System.Environment;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace CacaoBeaconMonitor
 {
@@ -57,9 +58,8 @@ namespace CacaoBeaconMonitor
             listview.Adapter = _adapter;
         }
 
-        BluetoothLeScanner scanner = null;
+        BluetoothLeScanner _scanner = null;
         _ScanCallback _callback = null;
-
         List<string> maclist = new List<string>();
 
         public CBReceiver cbreciever = new CBReceiver();
@@ -94,14 +94,17 @@ namespace CacaoBeaconMonitor
                 var textKey = row.FindViewById<Android.Widget.TextView>(Resource.Id.key);
                 var textStartTime = row.FindViewById<Android.Widget.TextView>(Resource.Id.starttime);
                 var textEndTime = row.FindViewById<Android.Widget.TextView>(Resource.Id.endtime);
+                var textRssi = row.FindViewById<Android.Widget.TextView>(Resource.Id.rssi);
 
                 var item = this.Items[position];
                 textKey.Text = item.ToKeyString();
-                textStartTime.Text = item.StartTime.ToString("HH:mm:ss");
+                textStartTime.Text = item.StartTime.ToString("yyyy-MM-dd HH:mm:ss");
                 textEndTime.Text = item.EndTime.ToString("HH:mm:ss");
+                textRssi.Text = item.RSSI_max.ToString();
                 return row;
             }
         }
+
 
         /// <summary>
         /// スキャン開始
@@ -112,25 +115,37 @@ namespace CacaoBeaconMonitor
         {
             cbreciever.LoadStorage();
 
-            if ( scanner == null )
+            if (_scanner == null )
             {
                 // スキャン開始
-                scanner = BluetoothAdapter.DefaultAdapter.BluetoothLeScanner;
+                _scanner = BluetoothAdapter.DefaultAdapter.BluetoothLeScanner;
                 _callback = new _ScanCallback();
                 _callback.eventScanResult += Callback_eventScanResult;
-                scanner.StartScan(_callback);
+                _scanner.StartScan(_callback);
                 var btn = this.View.FindViewById<Android.Widget.Button>(Resource.Id.buttonScan);
                 btn.Text = "STOP";
             }
             else
             {
                 // スキャン停止
-                scanner.StopScan(_callback);
+                _scanner.StopScan(_callback);
                 var btn = this.View.FindViewById<Android.Widget.Button>(Resource.Id.buttonScan);
                 btn.Text = "START";
-                scanner = null;
+                _scanner = null;
             }
         }
+
+        /// <summary>
+        /// 画面更新タイミング
+        /// </summary>
+        private DateTime _updateTime = DateTime.Now;
+
+        private class KeepRPI
+        {
+            public DateTime RecvTime { get; set; }
+            public byte[] Key { get; set; }
+        }
+        private List<KeepRPI> _keeprpi = new List<KeepRPI>();
 
         /// <summary>
         /// Beaconのスキャン
@@ -151,9 +166,36 @@ namespace CacaoBeaconMonitor
             {
                 var uuid = it.Key.ToString();
                 var data = tohex(it.Value);
-                cbreciever.Recv(it.Value[0..16], DateTime.Now, (short)result.Rssi,0);
-                _adapter.Items = cbreciever.RPIs.OrderByDescending( t => t.StartTime ).ToList();
-                _adapter.NotifyDataSetChanged();
+                cbreciever.Recv(it.Value[0..16], DateTime.Now, (short)result.Rssi, 0);
+
+
+                // 直近5分間のRPIをキープする
+                var rpi = it.Value[0..16];
+                var item = _keeprpi.FirstOrDefault(t => t.Key.SequenceEqual(rpi));
+                if ( item == null )
+                {
+                    _keeprpi.Add(new KeepRPI { RecvTime = DateTime.Now, Key = rpi });
+                } 
+                else
+                {
+                    item.RecvTime = DateTime.Now;
+                }
+
+                // 前回から5秒過ぎていれば画面を更新する
+                if (_updateTime.AddSeconds(5) < DateTime.Now)
+                {
+                    _adapter.Items = cbreciever.RPIs.OrderByDescending(t => t.StartTime).ToList();
+                    _adapter.NotifyDataSetChanged();
+                    // 5秒ごとにキープリストを更新
+                    _keeprpi = _keeprpi.Where(t => t.RecvTime < DateTime.Now.AddMinutes(5)).ToList();
+                    _updateTime = DateTime.Now;
+
+                    var textKeepCount = this.View.FindViewById<Android.Widget.TextView>(Resource.Id.keepCount);
+                    var textUpdateTime = this.View.FindViewById<Android.Widget.TextView>(Resource.Id.updateTime);
+                    textKeepCount.Text = _keeprpi.Count.ToString();
+                    textUpdateTime.Text = _updateTime.ToString("HH:mm:ss");
+
+                }
             }
 
 
@@ -253,19 +295,19 @@ namespace CacaoBeaconMonitor
             dlg.SetPositiveButton( //OKボタンの処理
                 "OK", (_, __) => {
 
-                    if (scanner != null)
+                    if (_scanner != null)
                     {
                         // いったん止めてからリセットする
-                        scanner.StopScan(_callback);
+                        _scanner.StopScan(_callback);
                     }
                     cbreciever.Storage.Reset();
                     cbreciever.RPIs.Clear();
-                    _adapter.Items = cbreciever.RPIs.OrderByDescending(t => t.StartTime).ToList();
-                    _adapter.NotifyDataSetChanged();
+                    // _adapter.Items = cbreciever.RPIs.OrderByDescending(t => t.StartTime).ToList();
+                    // _adapter.NotifyDataSetChanged();
 
-                    if (scanner != null)
+                    if (_scanner != null)
                     {
-                        scanner.StartScan(_callback);
+                        _scanner.StartScan(_callback);
                     }
                 });
             dlg.SetNegativeButton( //Cancelボタンの処理

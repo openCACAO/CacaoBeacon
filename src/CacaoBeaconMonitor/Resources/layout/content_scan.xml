@@ -9,11 +9,49 @@
     android:layout_marginTop="50dp"
     >
 
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/layoutKeepCount" >
+    
+        <TextView
+          android:layout_width="50dp"
+          android:layout_height="wrap_content"
+          android:text="接触数"
+          android:textSize="12dp" />
+    
+        <TextView
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:text="0"
+          android:id="@+id/keepCount"
+          android:textSize="20dp" />
+
+        <TextView
+          android:layout_width="70dp"
+          android:layout_height="wrap_content"
+          android:text="更新日時"
+          android:textSize="12dp" />
+    
+        <TextView
+          android:layout_width="0dp"
+          android:layout_height="wrap_content"
+          android:layout_weight="1"
+          android:id="@+id/updateTime"
+          android:text="00:00:00"
+          android:textSize="20dp" />
+
+    </LinearLayout>
+
+
     <Button
         android:text="Start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/buttonScan"
+        android:layout_below="@+id/layoutKeepCount"
         />
     <Button
         android:text="Save"
