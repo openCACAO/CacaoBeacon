@@ -53,7 +53,6 @@ namespace CacaoBeaconMonitor
             lv1.Adapter = adapter;
         }
 
-        TekAdapter _adapter;
         public class TekAdapter : Android.Widget.BaseAdapter<TEK>
         {
             Context _context;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using System.ComponentModel.DataAnnotations;
 
 namespace OpenCacao.CacaoBeacon
 {
@@ -12,12 +13,17 @@ namespace OpenCacao.CacaoBeacon
     /// </summary>
     public class RPI
     {
-        public byte[] Key { get; set; }
-        public DateTime StartTime { get; set; } // 開始時刻
-        public DateTime EndTime { get; set; }   // 終了時刻
+        [Key]
+        public int Id { get; set; }                    // ID for Storage
+        [MaxLength(16)]
+        public byte[] Key { get; set; }         // Rotating Proximity Identifier
+        [MaxLength(4)]
+        public byte[] Metadata { get; set; }    // Associated Encrypted Metadata
+        public DateTimeOffset StartTime { get; set; } // 開始時刻
+        public DateTimeOffset EndTime { get; set; }   // 終了時刻
         public short RSSI_min { get; set; }     // 電波強度(dBm) 最小（遠い）
         public short RSSI_max { get; set; }     // 電波強度(dBm) 最大（近い）
-        public ulong MAC { get; set; }          // MAC アドレス
+        public ulong MAC { get; set; }          // MAC アドレス（実際はランダム値）
         public string ToKeyString()
         {
             return BitConverter.ToString(this.Key).Replace("-", "").ToLower();
@@ -35,6 +41,9 @@ namespace OpenCacao.CacaoBeacon
     /// </summary>
     public class TEK
     {
+        [Key]
+        public int Id { get; set; }                    // ID for Storage
+        [MaxLength(16)]
         public byte[] Key { get; set; }
         public int RollingStartIntervalNumber { get; set; }
         public int TransmissionRiskLevel { get; set; }
@@ -64,6 +73,23 @@ namespace OpenCacao.CacaoBeacon
             return BitConverter.ToString(this.Key).Replace("-", "").ToLower();
         }
     }
+
+    /// <summary>
+    /// TEKから144個のRPIを生成
+    /// </summary>
+    public class EXRPI
+    {
+        [Key]
+        public int Id { get; set; }             // ID for Storage
+        [MaxLength(16)]
+        public byte[] TEK { get; set; }         // Temporary Exposure Key
+        [MaxLength(16)]
+        public byte[] RPI { get; set; }         // Rotating Proximity Identifier
+        public int RollingStartIntervalNumber { get; set; }
+        public DateTimeOffset StartDate { get; set; } // RollingStartIntervalNumber を日付に
+        public DateTimeOffset RpiDate { get; set; }   // RPI生成の時刻（10分単位）
+    }
+
 
 
     public class CBReceiver
@@ -103,6 +129,7 @@ namespace OpenCacao.CacaoBeacon
                 RSSI_min = rssi,
                 RSSI_max = rssi,
                 MAC = mac,
+                Metadata = new byte[] {0},
             };
             this.RPIs.Add(item);
             this.Storage?.Add(item);
@@ -117,11 +144,12 @@ namespace OpenCacao.CacaoBeacon
         /// </summary>
         public void LoadStorage()
         {
-            if ( this.Storage != null )
+            if ( this.Storage == null )
             {
-                this.RPIs.Clear();
-                this.RPIs.AddRange(this.Storage.RPI);
+                this.Storage = CBStorageSQLite.Create();
             }
+            this.RPIs.Clear();
+            this.RPIs.AddRange(this.Storage.RPI);
         }
     }
 
@@ -162,6 +190,10 @@ namespace OpenCacao.CacaoBeacon
         /// ストレージから TEK のリストを取得する
         /// </summary>
         public virtual List<TEK> TEK => new List<TEK>();
+        /// <summary>
+        /// ストレージのパスを返す
+        /// </summary>
+        public virtual string StoragePath => "";
     }
 
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,16 +13,27 @@ namespace OpenCacao.CacaoBeacon
 
     public class CBStorageSQLite : CBStorage
     {
-        public const string PATH_DB = "cacaodb.sqlite3";
+        public static string PATH_DB = "cacaodb.sqlite3";
+
+#if __ANDROID__
+        public override string StoragePath => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + PATH_DB;
+#else
+        public override string StoragePath => PATH_DB;
+#endif
+
         private CBContext _context;
 
         public static CBStorageSQLite Create( bool reset = false)
         {
             if ( reset == false )
             {
-                CBContext context = CBStorageSQLite.CreateContext();
-                return new CBStorageSQLite() { _context = context };
-            } 
+                var context = new CBContext();
+                context.Migrate();
+                return new CBStorageSQLite()
+                {
+                    _context = context,
+                };
+            }
             else
             {
                 var o = new CBStorageSQLite();
@@ -29,49 +41,9 @@ namespace OpenCacao.CacaoBeacon
                 return o;
             }
         }
-        
-        public CBStorageSQLite() { 
-            _context = CBStorageSQLite.CreateContext(); 
+        protected CBStorageSQLite() {
+            
         }
-        protected static CBContext CreateContext()
-        {
-#if __ANDROID__
-            string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + PATH_DB;
-#else
-            string path = PATH_DB;
-#endif
-            CBContext context;
-            if (File.Exists(path) == false)
-            {
-                context = new CBContext();
-                context.Database.ExecuteSqlRaw(@"
-CREATE TABLE RPI (
-    ID    INTEGER NOT NULL,
-    Key   TEXT NOT NULL,
-    StartTime TEXT NOT NULL,
-    EndTime   TEXT NOT NULL,
-    RSSI_min  INTEGER NOT NULL,
-    RSSI_max  INTEGER NOT NULL,
-    MAC   TEXT NOT NULL,
-    PRIMARY KEY(ID AUTOINCREMENT)
-);
-CREATE TABLE TEK (
-    ID    INTEGER NOT NULL,
-    Key   TEXT NOT NULL,
-    RollingStartIntervalNumber  INTEGER NOT NULL,
-    TransmissionRiskLevel  INTEGER NOT NULL,
-    RollingPeriod  INTEGER NOT NULL,
-    PRIMARY KEY(ID AUTOINCREMENT)
-)
-");
-            }
-            else
-            {
-                context = new CBContext();
-            }
-            return context;
-        }
-
         /// <summary>
         /// ストレージを消去してリセットする
         /// </summary>
@@ -93,7 +65,8 @@ CREATE TABLE TEK (
             {
                 System.IO.File.Delete(path);
             }
-            _context = CreateContext();
+            _context = new CBContext();
+            _context.Migrate();
         }
 
         /// <summary>
@@ -102,7 +75,7 @@ CREATE TABLE TEK (
         /// <param name="rpi"></param>
         public override void Add( RPI rpi )
         {
-            _context.Add(_RPI.ConverFrom(rpi));
+            _context.RPI.Add(rpi);
             _context.SaveChanges();
         }
         /// <summary>
@@ -113,7 +86,7 @@ CREATE TABLE TEK (
         {
             foreach ( var it in rpis )
             {
-                _context.Add(_RPI.ConverFrom(it));
+                _context.Add(it);
             }
             _context.SaveChanges();
         }
@@ -123,12 +96,11 @@ CREATE TABLE TEK (
         /// <param name="rpi"></param>
         public override void Update(RPI rpi)
         {
-            var item = _context.RPI.FirstOrDefault(t => t.Key == rpi.ToKeyString());
+            var item = _context.RPI.FirstOrDefault(t => t.Key.SequenceEqual(rpi.Key));
             if (item == null) return;
-            var newitem = _RPI.ConverFrom(rpi);
-            item.EndTime = newitem.EndTime;
-            item.RSSI_max = newitem.RSSI_max;
-            item.RSSI_min = newitem.RSSI_min;
+            item.EndTime = rpi.EndTime;
+            item.RSSI_max = rpi.RSSI_max;
+            item.RSSI_min = rpi.RSSI_min;
             _context.SaveChanges();
         }
 
@@ -139,7 +111,7 @@ CREATE TABLE TEK (
                 var items = new List<RPI>();
                 foreach (var it in _context.RPI.ToList())
                 {
-                    items.Add(it.ConvertTo());
+                    items.Add(it);
                 }
                 return items;
             }
@@ -157,97 +129,84 @@ CREATE TABLE TEK (
 #endif
                 optionsBuilder.UseSqlite($"Data Source={path}");
             }
+            
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
                 base.OnModelCreating(modelBuilder);
-                modelBuilder.Entity<_RPI>().HasKey(t => t.ID);
-                modelBuilder.Entity<_TEK>().HasKey(t => t.ID);
 
+                /// RPI,TEKのテーブルを自動作成する
+                MigrationBuilder migrationBuilder = new MigrationBuilder(this.Database.ProviderName);
+                migrationBuilder.CreateTable(
+                    name: "RPI",
+                    columns: table => new
+                    {
+                        Id = table.Column<int>(type: "INTEGER", nullable: false)
+                            .Annotation("Sqlite:Autoincrement", true),
+                        Key = table.Column<byte[]>(type: "BLOB", nullable: true),
+                        Metadata = table.Column<byte[]>(type: "BLOB", nullable: true),
+                        StartTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                        EndTime = table.Column<DateTime>(type: "TEXT", nullable: false),
+                        RSSI_min = table.Column<short>(type: "INTEGER", nullable: false),
+                        RSSI_max = table.Column<short>(type: "INTEGER", nullable: false),
+                        MAC = table.Column<ulong>(type: "INTEGER", nullable: false)
+                    },
+                    constraints: table =>
+                    {
+                        table.PrimaryKey("PK_RPI", x => x.Id);
+                    });
+
+                migrationBuilder.CreateTable(
+                    name: "TEK",
+                    columns: table => new
+                    {
+                        Id = table.Column<int>(type: "INTEGER", nullable: false)
+                            .Annotation("Sqlite:Autoincrement", true),
+                        Key = table.Column<byte[]>(type: "BLOB", nullable: true),
+                        RollingStartIntervalNumber = table.Column<int>(type: "INTEGER", nullable: false),
+                        TransmissionRiskLevel = table.Column<int>(type: "INTEGER", nullable: false),
+                        RollingPeriod = table.Column<int>(type: "INTEGER", nullable: false),
+                        Date = table.Column<DateTime>(type: "TEXT", nullable: false)
+                    },
+                    constraints: table =>
+                    {
+                        table.PrimaryKey("PK_TEK", x => x.Id);
+                    });
             }
-            public DbSet<_RPI> RPI { get; set; }
-            public DbSet<_TEK> TEK { get; set; }
-        }
+            public DbSet<RPI> RPI => Set<RPI>();
+            public DbSet<TEK> TEK => Set<TEK>();
 
-        /// <summary>
-        /// SQLite用のRPI
-        /// </summary>
-        public class _RPI
-        {
-            public int ID { get; set; }
-            public string Key { get; set; }
-            public string StartTime { get; set; }
-            public string EndTime { get; set; }
-            public int RSSI_min { get; set; }
-            public int RSSI_max { get; set; }
-            public string MAC { get; set; }
-
-            public static _RPI ConverFrom(RPI rpi)
+            public void Migrate()
             {
-                return new _RPI()
+#if __ANDROID__
+                var SQL = @"
+CREATE TABLE RPI (
+    Id INTEGER NOT NULL CONSTRAINT PK_RPI PRIMARY KEY AUTOINCREMENT,
+    Key BLOB NOT NULL,
+    Metadata BLOB NOT NULL,
+    StartTime TEXT NOT NULL,
+    EndTime TEXT NOT NULL,
+    RSSI_min INTEGER NOT NULL,
+    RSSI_max INTEGER NOT NULL,
+    MAC INTEGER NOT NULL
+);
+CREATE TABLE TEK(
+    Id INTEGER NOT NULL CONSTRAINT PK_TEK PRIMARY KEY AUTOINCREMENT,
+    Key BLOB NOT NULL,
+    RollingStartIntervalNumber INTEGER NOT NULL,
+    TransmissionRiskLevel INTEGER NOT NULL,
+    RollingPeriod INTEGER NOT NULL
+);
+";
+                try
                 {
-                    Key = rpi.ToKeyString(),
-                    StartTime = rpi.StartTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                    EndTime = rpi.EndTime.ToString("yyyy-MM-dd HH:mm:ss"),
-                    RSSI_min = rpi.RSSI_min,
-                    RSSI_max = rpi.RSSI_max,
-                    MAC = rpi.toMacString()
-                };
-            }
-            public RPI ConvertTo()
-            {
-                var rpi = new RPI();
-
-                byte[] data = new byte[this.Key.Length / 2];
-                var s = this.Key.ToUpper();
-                for ( int i=0; i<data.Length; i++ )
-                {
-                    data[i] = (byte)("0123456789ABCDEF".IndexOf(s[i * 2]) * 16 + "0123456789ABCDEF".IndexOf(s[i * 2 + 1]));
+                    this.Database.ExecuteSqlRaw(SQL);
+                } catch { 
+                    // 既に作成済みの場合はエラーを無視する
                 }
-                rpi.Key = data;
-                rpi.StartTime = DateTime.Parse(this.StartTime);
-                rpi.EndTime = DateTime.Parse(this.EndTime);
-                return rpi;
+#else
+                this.Database.Migrate();
+#endif
             }
         }
-
-        /// <summary>
-        /// SQLite用のTEK
-        /// </summary>
-        public class _TEK
-        {
-            public int ID { get; set; }
-            public string Key { get; set; }
-            public int RollingStartIntervalNumber { get; set; }
-            public int TransmissionRiskLevel { get; set; }
-            public int RollingPeriod { get; set; }
-        
-        
-            public static _TEK FromTEK( TEK tek )
-            {
-                return new _TEK()
-                {
-                    Key = tek.ToKeyString(),
-                    RollingStartIntervalNumber = tek.RollingStartIntervalNumber,
-                    TransmissionRiskLevel = tek.TransmissionRiskLevel,
-                    RollingPeriod = tek.RollingPeriod,
-                };
-            }
-            public TEK ToTEK()
-            {
-                var tek = new TEK();
-                byte[] data = new byte[this.Key.Length / 2];
-                var s = this.Key.ToUpper();
-                for (int i = 0; i < data.Length; i++)
-                {
-                    data[i] = (byte)("0123456789ABCDEF".IndexOf(s[i * 2]) * 16 + "0123456789ABCDEF".IndexOf(s[i * 2 + 1]));
-                }
-                tek.Key = data;
-                tek.RollingStartIntervalNumber = this.RollingStartIntervalNumber;
-                tek.TransmissionRiskLevel = this.TransmissionRiskLevel;
-                tek.RollingPeriod = this.RollingPeriod;
-                return tek;
-            }
-        }
-        
     }
 }

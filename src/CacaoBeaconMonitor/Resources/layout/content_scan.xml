@@ -10,15 +10,29 @@
     >
 
     <Button
-        android:text="scan"
+        android:text="Start"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/buttonScan"
+        />
+    <Button
+        android:text="Save"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonScanSave"
+        android:layout_below="@+id/buttonScan"
+        />
+    <Button
+        android:text="Reset"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/buttonScanReset"
+        android:layout_below="@+id/buttonScanSave"
         />
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/listViewScan"
-        android:layout_below="@id/buttonScan" 
+        android:layout_below="@id/buttonScanReset" 
     />
 </RelativeLayout>

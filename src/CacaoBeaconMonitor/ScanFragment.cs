@@ -12,6 +12,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Environment = System.Environment;
+using System.IO;
 
 namespace CacaoBeaconMonitor
 {
@@ -35,6 +37,11 @@ namespace CacaoBeaconMonitor
             var btn = this.View.FindViewById<Android.Widget.Button>(Resource.Id.buttonScan);
             btn.Click += OnRecvClick;
 
+            var btn2 = this.View.FindViewById<Android.Widget.Button>(Resource.Id.buttonScanSave);
+            btn2.Click += OnSaveClick;
+
+            var btn3 = this.View.FindViewById<Android.Widget.Button>(Resource.Id.buttonScanReset);
+            btn3.Click += OnResetClick;
 
             var listview = View.FindViewById<Android.Widget.ListView>(Resource.Id.listViewScan);
             _adapter = new BeaconAdapter(this.Context);
@@ -50,13 +57,12 @@ namespace CacaoBeaconMonitor
             listview.Adapter = _adapter;
         }
 
-        BluetoothLeScanner scanner;
+        BluetoothLeScanner scanner = null;
+        _ScanCallback _callback = null;
+
         List<string> maclist = new List<string>();
-        
-        public static CBReceiver cbreciever = new CBReceiver()
-        {
-            Storage = new CBStorageSQLite(),
-        };
+
+        public CBReceiver cbreciever = new CBReceiver();
 
         BeaconAdapter _adapter;
         public class BeaconAdapter : Android.Widget.BaseAdapter<RPI>
@@ -106,15 +112,24 @@ namespace CacaoBeaconMonitor
         {
             cbreciever.LoadStorage();
 
-
-            scanner = BluetoothAdapter.DefaultAdapter.BluetoothLeScanner;
-            var callback = new _ScanCallback();
-            callback.eventScanResult += Callback_eventScanResult;
-            scanner.StartScan(callback);
-
-            // _adapter = new BeaconAdapter(this);
-            // var lv1 = FindViewById<Android.Widget.ListView>(Resource.Id.listView1);
-            // lv1.Adapter = _adapter;
+            if ( scanner == null )
+            {
+                // スキャン開始
+                scanner = BluetoothAdapter.DefaultAdapter.BluetoothLeScanner;
+                _callback = new _ScanCallback();
+                _callback.eventScanResult += Callback_eventScanResult;
+                scanner.StartScan(_callback);
+                var btn = this.View.FindViewById<Android.Widget.Button>(Resource.Id.buttonScan);
+                btn.Text = "STOP";
+            }
+            else
+            {
+                // スキャン停止
+                scanner.StopScan(_callback);
+                var btn = this.View.FindViewById<Android.Widget.Button>(Resource.Id.buttonScan);
+                btn.Text = "START";
+                scanner = null;
+            }
         }
 
         /// <summary>
@@ -136,8 +151,8 @@ namespace CacaoBeaconMonitor
             {
                 var uuid = it.Key.ToString();
                 var data = tohex(it.Value);
-                cbreciever.Recv(it.Value[0..16]);
-                _adapter.Items = cbreciever.RPIs;
+                cbreciever.Recv(it.Value[0..16], DateTime.Now, (short)result.Rssi,0);
+                _adapter.Items = cbreciever.RPIs.OrderByDescending( t => t.StartTime ).ToList();
                 _adapter.NotifyDataSetChanged();
             }
 
@@ -197,5 +212,66 @@ namespace CacaoBeaconMonitor
             }
         }
 
+        /// <summary>
+        /// データを保存
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private void OnSaveClick(object sender, EventArgs eventArgs)
+        {
+            if (cbreciever == null) return;
+
+            var contextRef = new WeakReference<Context>(this.Context);
+            contextRef.TryGetTarget(out var c);
+            var dir = c.GetExternalFilesDir(null).AbsolutePath;
+            var outpath = System.IO.Path.Combine(dir, $"caraodb-{DateTime.Now.ToString("yyyyMMdd-HHmm")}.sqlite3");
+
+            var dbpath = cbreciever.Storage.StoragePath;
+            using (var fs = File.OpenRead(dbpath))
+            {
+                byte[] data = new byte[fs.Length];
+                fs.Read(data, 0, data.Length);
+                File.WriteAllBytes(outpath, data);
+            }
+
+            var dlg = new AlertDialog.Builder(this.Context);
+            dlg.SetMessage($"{outpath}に保存しました");
+            dlg.SetPositiveButton( //OKボタンの処理
+                "OK", (_,__) => { });
+            dlg.Create().Show();
+        }
+
+        /// <summary>
+        /// データベースを消去してリセット
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private void OnResetClick(object sender, EventArgs eventArgs)
+        {
+            var dlg = new AlertDialog.Builder(this.Context);
+            dlg.SetMessage($"収集データを消去しますか？");
+            dlg.SetPositiveButton( //OKボタンの処理
+                "OK", (_, __) => {
+
+                    if (scanner != null)
+                    {
+                        // いったん止めてからリセットする
+                        scanner.StopScan(_callback);
+                    }
+                    cbreciever.Storage.Reset();
+                    cbreciever.RPIs.Clear();
+                    _adapter.Items = cbreciever.RPIs.OrderByDescending(t => t.StartTime).ToList();
+                    _adapter.NotifyDataSetChanged();
+
+                    if (scanner != null)
+                    {
+                        scanner.StartScan(_callback);
+                    }
+                });
+            dlg.SetNegativeButton( //Cancelボタンの処理
+                "Cancel", (_, __) => { });
+            dlg.Create().Show();
+
+        }
     }
 }
