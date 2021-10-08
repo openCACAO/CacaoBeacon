@@ -16,9 +16,9 @@
         android:id="@+id/layoutKeepCount" >
     
         <TextView
-          android:layout_width="50dp"
+          android:layout_width="80dp"
           android:layout_height="wrap_content"
-          android:text="接触数"
+          android:text="同時接触数"
           android:textSize="12dp" />
     
         <TextView

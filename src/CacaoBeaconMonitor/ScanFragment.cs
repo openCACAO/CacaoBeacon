@@ -187,7 +187,8 @@ namespace CacaoBeaconMonitor
                     _adapter.Items = cbreciever.RPIs.OrderByDescending(t => t.StartTime).ToList();
                     _adapter.NotifyDataSetChanged();
                     // 5秒ごとにキープリストを更新
-                    _keeprpi = _keeprpi.Where(t => t.RecvTime > DateTime.Now.AddMinutes(-5)).ToList();
+                    // 同時接触数を直近30秒間に制限
+                    _keeprpi = _keeprpi.Where(t => t.RecvTime > DateTime.Now.AddSeconds(-30)).ToList();
                     _updateTime = DateTime.Now;
 
                     var textKeepCount = this.View.FindViewById<Android.Widget.TextView>(Resource.Id.keepCount);
