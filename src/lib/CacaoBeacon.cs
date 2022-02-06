@@ -5,13 +5,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace OpenCacao.CacaoBeacon
 {
     /// <summary>
     ///  Rotating Proximity Identifier
     /// </summary>
-    public class RPI
+    [Table("RPI")]
+    public class RotatingProximityIdentifier
     {
         [Key]
         public int Id { get; set; }                    // ID for Storage
@@ -21,8 +23,8 @@ namespace OpenCacao.CacaoBeacon
         public byte[] Metadata { get; set; }    // Associated Encrypted Metadata
         public DateTimeOffset StartTime { get; set; } // 開始時刻
         public DateTimeOffset EndTime { get; set; }   // 終了時刻
-        public short RSSI_min { get; set; }     // 電波強度(dBm) 最小（遠い）
-        public short RSSI_max { get; set; }     // 電波強度(dBm) 最大（近い）
+        public short RssiMin { get; set; }     // 電波強度(dBm) 最小（遠い）
+        public short RssiMax { get; set; }     // 電波強度(dBm) 最大（近い）
         public ulong MAC { get; set; }          // MAC アドレス（実際はランダム値）
         public string ToKeyString()
         {
@@ -39,7 +41,8 @@ namespace OpenCacao.CacaoBeacon
     /// <summary>
     ///  Temporary Exposure Key 
     /// </summary>
-    public class TEK
+    [Table("TEK")]
+    public class TemporaryExposureKey
     {
         [Key]
         public int Id { get; set; }                    // ID for Storage
@@ -77,7 +80,8 @@ namespace OpenCacao.CacaoBeacon
     /// <summary>
     /// TEKから144個のRPIを生成
     /// </summary>
-    public class EXRPI
+    [Table("EXRPI")]
+    public class ExportRotatingProximityIdentifier
     {
         [Key]
         public int Id { get; set; }             // ID for Storage
@@ -90,11 +94,9 @@ namespace OpenCacao.CacaoBeacon
         public DateTimeOffset RpiDate { get; set; }   // RPI生成の時刻（10分単位）
     }
 
-
-
     public class CBReceiver
     {
-        public List<RPI> RPIs { get; } = new List<RPI>();
+        public List<RotatingProximityIdentifier> RPIs { get; } = new List<RotatingProximityIdentifier>();
         public CBStorage Storage { get; set; } = null;
 
         /// <summary>
@@ -115,19 +117,19 @@ namespace OpenCacao.CacaoBeacon
                 if ( it.Key.SequenceEqual(rpi) == true && it.MAC == mac )
                 {
                     it.EndTime = time;
-                    if (it.RSSI_min > rssi) it.RSSI_min = rssi;
-                    if (it.RSSI_max < rssi) it.RSSI_max = rssi;
+                    if (it.RssiMin > rssi) it.RssiMin = rssi;
+                    if (it.RssiMax < rssi) it.RssiMax = rssi;
                     this.Storage?.Update(it);
                     return;
                 }
             }
-            var item = new RPI
+            var item = new RotatingProximityIdentifier
             {
                 Key = rpi,
                 StartTime = time,
                 EndTime = time,
-                RSSI_min = rssi,
-                RSSI_max = rssi,
+                RssiMin = rssi,
+                RssiMax = rssi,
                 MAC = mac,
                 Metadata = new byte[] {0},
             };
@@ -144,19 +146,22 @@ namespace OpenCacao.CacaoBeacon
         /// </summary>
         public void LoadStorage()
         {
+#if __ANDROID__
+            // Android の場合のみ復元する
             if ( this.Storage == null )
             {
                 this.Storage = CBStorageSQLite.Create();
             }
             this.RPIs.Clear();
             this.RPIs.AddRange(this.Storage.RPI);
+#endif
         }
     }
 
     /// <summary>
     /// RPI, TEK を永続化するためのストレージクラス
     /// </summary>
-    public  abstract class CBStorage
+    public abstract class CBStorage
     {
         /// <summary>
         /// ストレージを消去してリセットする
@@ -166,30 +171,30 @@ namespace OpenCacao.CacaoBeacon
         /// ひとつの RPI を更新する
         /// </summary>
         /// <param name="item"></param>
-        public virtual void Update(RPI item) { }
+        public virtual void Update(RotatingProximityIdentifier item) { }
         /// <summary>
         /// ひとつの RPI を追加する
         /// </summary>
         /// <param name="item"></param>
-        public virtual void Add(RPI item) { }
+        public virtual void Add(RotatingProximityIdentifier item) { }
         /// <summary>
         /// 複数の RPI を追加する
         /// </summary>
         /// <param name="items"></param>
-        public virtual void AddRange(List<RPI> items) { }
+        public virtual void AddRange(List<RotatingProximityIdentifier> items) { }
         /// <summary>
         /// ひとつの TEK を追加する
         /// </summary>
         /// <param name="item"></param>
-        public virtual void Add( TEK item) { }
+        public virtual void Add(TemporaryExposureKey item) { }
         /// <summary>
         /// ストレージから RPI のリストを取得する
         /// </summary>
-        public virtual List<RPI> RPI => new List<RPI>();
+        public virtual List<RotatingProximityIdentifier> RPI => new List<RotatingProximityIdentifier>();
         /// <summary>
         /// ストレージから TEK のリストを取得する
         /// </summary>
-        public virtual List<TEK> TEK => new List<TEK>();
+        public virtual List<TemporaryExposureKey> TEK => new List<TemporaryExposureKey>();
         /// <summary>
         /// ストレージのパスを返す
         /// </summary>
@@ -199,16 +204,16 @@ namespace OpenCacao.CacaoBeacon
 
     public class CBManager
     {
-        public List<TEK> TEKs { get; set; }
-        public List<(TEK,RPI)> match { get; set; }
+        public List<TemporaryExposureKey> TEKs { get; set; }
+        public List<(TemporaryExposureKey, RotatingProximityIdentifier)> match { get; set; }
 
         /// <summary>
         /// 接触判定をする
         /// </summary>
         /// <param name="pris"></param>
-        public List<(TEK, RPI)> Detect(List<RPI> rpis) {
+        public List<(TemporaryExposureKey, RotatingProximityIdentifier)> Detect(List<RotatingProximityIdentifier> rpis) {
 
-            this.match = new List<(TEK,RPI)>();
+            this.match = new List<(TemporaryExposureKey, RotatingProximityIdentifier)>();
             foreach ( var tek in this.TEKs )
             {
                 var result = Detect(tek, rpis);
@@ -221,9 +226,9 @@ namespace OpenCacao.CacaoBeacon
         /// 接触判定をする
         /// </summary>
         /// <param name="pris"></param>
-        public static List<(TEK, RPI)> Detect(TEK tek, List<RPI> rpis)
+        public static List<(TemporaryExposureKey, RotatingProximityIdentifier)> Detect(TemporaryExposureKey tek, List<RotatingProximityIdentifier> rpis)
         {
-            var match = new List<(TEK, RPI)>();
+            var match = new List<(TemporaryExposureKey, RotatingProximityIdentifier)>();
             // TEK から RPIs を生成する
             var RPIs = CBPack.makeRPIs(tek.Key, tek.RollingStartIntervalNumber);
             // 生成した RPIs が受信した rpis とマッチするか調べる

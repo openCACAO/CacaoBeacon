@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\lib\CacaoBeacon.cs" Link="CacaoBeacon.cs" />
+    <Compile Include="..\..\lib\CBStorageSQLite.cs" Link="CBStorageSQLite.cs" />
+  </ItemGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.10" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.10" />
+	</ItemGroup>
+
+</Project>

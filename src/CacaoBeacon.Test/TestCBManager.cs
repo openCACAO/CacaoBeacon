@@ -26,7 +26,7 @@ namespace CacaoBeacon.Test
 
             // zip をダウンロードして TEK を得る
             // 接触判定する
-            manager.TEKs = new List<TEK>() { new TEK { 
+            manager.TEKs = new List<TemporaryExposureKey>() { new TemporaryExposureKey { 
                 Key = tek, 
                 Date = dt   }};
             var match = manager.Detect(reciver.RPIs);
@@ -52,7 +52,7 @@ namespace CacaoBeacon.Test
             // zip をダウンロードして TEK を得る
             var tek2 = CBPack.makeTEK();
             // 異なるTEKで判定する接触判定する
-            manager.TEKs = new List<TEK>() { new TEK {
+            manager.TEKs = new List<TemporaryExposureKey>() { new TemporaryExposureKey {
                 Key = tek2,
                 Date = dt   }};
             var match = manager.Detect(reciver.RPIs);
@@ -76,7 +76,7 @@ namespace CacaoBeacon.Test
             // zip をダウンロードして TEK を得る
             // 初期化の日付が異なる場合は、マッチしない
             var dt2 = DateTime.Now.AddDays(5);
-            manager.TEKs = new List<TEK>() { new TEK {
+            manager.TEKs = new List<TemporaryExposureKey>() { new TemporaryExposureKey {
                 Key = tek,
                 Date = dt2   }};
             var match = manager.Detect(reciver.RPIs);

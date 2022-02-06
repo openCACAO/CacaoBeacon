@@ -46,8 +46,8 @@ namespace CacaoBeaconMonitor
 
             var listview = View.FindViewById<Android.Widget.ListView>(Resource.Id.listViewScan);
             _adapter = new BeaconAdapter(this.Context);
-            _adapter.Items = new List<RPI> {
-                new RPI()
+            _adapter.Items = new List<RotatingProximityIdentifier> {
+                new RotatingProximityIdentifier()
                 {
                     Key = new byte[] { 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, },
                     StartTime = DateTime.Now,
@@ -65,12 +65,12 @@ namespace CacaoBeaconMonitor
         public CBReceiver cbreciever = new CBReceiver();
 
         BeaconAdapter _adapter;
-        public class BeaconAdapter : Android.Widget.BaseAdapter<RPI>
+        public class BeaconAdapter : Android.Widget.BaseAdapter<RotatingProximityIdentifier>
         {
             Context _context;
             LayoutInflater _layoutInflater = null;
 
-            public List<RPI> Items { get; set; } = new List<RPI>();
+            public List<RotatingProximityIdentifier> Items { get; set; } = new List<RotatingProximityIdentifier>();
             public BeaconAdapter(Context context)
             {
                 _context = context;
@@ -78,7 +78,7 @@ namespace CacaoBeaconMonitor
             }
 
             public override int Count => this.Items.Count;
-            public override RPI this[int position] => this.Items[position];
+            public override RotatingProximityIdentifier this[int position] => this.Items[position];
             public override long GetItemId(int position)
             {
                 return position;
@@ -100,7 +100,7 @@ namespace CacaoBeaconMonitor
                 textKey.Text = item.ToKeyString();
                 textStartTime.Text = item.StartTime.ToString("yyyy-MM-dd HH:mm:ss");
                 textEndTime.Text = item.EndTime.ToString("HH:mm:ss");
-                textRssi.Text = item.RSSI_max.ToString();
+                textRssi.Text = item.RssiMax.ToString();
                 return row;
             }
         }

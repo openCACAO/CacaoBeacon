@@ -83,7 +83,7 @@ namespace console
             Console.WriteLine("---");
             foreach (var it in cbreceiver.RPIs)
             {
-                Console.WriteLine($"[{tohex(it.Key)}] {it.StartTime} {it.EndTime} {it.RSSI_min} {it.RSSI_max} dBm {it.toMacString()}");
+                Console.WriteLine($"[{tohex(it.Key)}] {it.StartTime} {it.EndTime} {it.RssiMin} {it.RssiMax} dBm {it.toMacString()}");
             }
             Console.WriteLine("---");
 

@@ -4,13 +4,13 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using Proto = OpenCacao.CacaoBeacon.Proto;
 #if __ANDROID__
 using Newtonsoft.Json;
 #else
 using System.Text.Json;
 #endif
 using System.Threading.Tasks;
-
 
 namespace OpenCacao.CacaoBeacon
 {
@@ -23,9 +23,9 @@ namespace OpenCacao.CacaoBeacon
         /// JSON形式のURLを指定して、TEKのリストを取得する
         /// </summary>
         /// <returns></returns>
-        public static async Task<List<TEK>> DownloadBatchAsync()
+        public static async Task<List<TemporaryExposureKey>> DownloadBatchAsync()
         {
-            List<TEK> result = new List<TEK>();
+            List<TemporaryExposureKey> result = new List<TemporaryExposureKey>();
 
             // JSONファイルをダウンロードする
             var cl = new HttpClient();
@@ -40,7 +40,7 @@ namespace OpenCacao.CacaoBeacon
             foreach ( var zip in zips )
             {
                 var data = await GetExportBin(zip.url);
-                var teke = TemporaryExposureKeyExport.Parser.ParseFrom(data);
+                var teke = Proto.TemporaryExposureKeyExport.Parser.ParseFrom(data);
                 var teks = ConvertTEK(teke);
                 result.AddRange(teks);
             }
@@ -52,10 +52,10 @@ namespace OpenCacao.CacaoBeacon
         /// </summary>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static async Task<List<TEK>> DownloadBatchAsync( string url )
+        public static async Task<List<TemporaryExposureKey>> DownloadBatchAsync( string url )
         {
             byte[] data = await GetExportBin(url);
-            var teke = TemporaryExposureKeyExport.Parser.ParseFrom(data);
+            var teke = Proto.TemporaryExposureKeyExport.Parser.ParseFrom(data);
             return ConvertTEK(teke);
         }
 
@@ -65,12 +65,12 @@ namespace OpenCacao.CacaoBeacon
         /// </summary>
         /// <param name="teke"></param>
         /// <returns></returns>
-        public static List<TEK> ConvertTEK(TemporaryExposureKeyExport teke)
+        public static List<TemporaryExposureKey> ConvertTEK(Proto.TemporaryExposureKeyExport teke)
         {
-            var result = new List<TEK>();
+            var result = new List<TemporaryExposureKey>();
             foreach (var tek in teke.Keys)
             {
-                result.Add(new TEK()
+                result.Add(new TemporaryExposureKey()
                 {
                     Key = tek.KeyData.ToByteArray(),
                     RollingStartIntervalNumber = tek.RollingStartIntervalNumber,
@@ -110,6 +110,30 @@ namespace OpenCacao.CacaoBeacon
         }
 
         /// <summary>
+        /// ZIPファイルのパスを指定して export.bin のデータを取得する
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static byte[] GetExportFile(string path)
+        {
+            var zipdata = System.IO.File.ReadAllBytes(path);
+            byte[] data;
+            using (var mem = new MemoryStream(zipdata))
+            {
+                using (var zip = new System.IO.Compression.ZipArchive(mem))
+                {
+                    var length = zip.GetEntry("export.bin").Length;
+                    using (var fs = new BinaryReader(zip.GetEntry("export.bin").Open()))
+                    {
+                        fs.ReadBytes(12);
+                        data = fs.ReadBytes((int)length - 12);
+                    }
+                }
+            }
+            return data;
+        }
+
+        /// <summary>
         /// サーバーからダウンロードした TEK のリストと
         /// スマホ内部で保持する RPI のリストを照合させる
         /// 
@@ -120,9 +144,9 @@ namespace OpenCacao.CacaoBeacon
         /// <param name="teks"></param>
         /// <param name="rpis"></param>
         /// <returns></returns>
-        public static List<(TEK, RPI)> FetchExposureKeyAsync(
-            List<TEK> teks, 
-            List<RPI> rpis )
+        public static List<(TemporaryExposureKey, RotatingProximityIdentifier)> FetchExposureKeyAsync(
+            List<TemporaryExposureKey> teks, 
+            List<RotatingProximityIdentifier> rpis )
         {
             var manager = new CBManager();
             manager.TEKs = teks;

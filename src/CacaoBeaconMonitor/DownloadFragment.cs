@@ -53,12 +53,12 @@ namespace CacaoBeaconMonitor
             lv1.Adapter = adapter;
         }
 
-        public class TekAdapter : Android.Widget.BaseAdapter<TEK>
+        public class TekAdapter : Android.Widget.BaseAdapter<TemporaryExposureKey>
         {
             Context _context;
             LayoutInflater _layoutInflater = null;
 
-            public List<TEK> Items { get; set; } = new List<TEK>();
+            public List<TemporaryExposureKey> Items { get; set; } = new List<TemporaryExposureKey>();
             public TekAdapter(Context context)
             {
                 _context = context;
@@ -66,7 +66,7 @@ namespace CacaoBeaconMonitor
             }
 
             public override int Count => this.Items.Count;
-            public override TEK this[int position] => this.Items[position];
+            public override TemporaryExposureKey this[int position] => this.Items[position];
             public override long GetItemId(int position)
             {
                 return position;

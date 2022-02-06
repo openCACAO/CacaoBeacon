@@ -9,6 +9,8 @@
 *.tlog
 *.idb
 
+temp/
+
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 

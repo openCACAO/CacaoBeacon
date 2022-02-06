@@ -1,5 +1,5 @@
 syntax = "proto2";
-option csharp_namespace = "OpenCacao.CacaoBeacon";
+option csharp_namespace = "OpenCacao.CacaoBeacon.Proto";
 
 message TemporaryExposureKeyExport {
   // Time window of keys in this batch based on arrival to server, in UTC seconds.

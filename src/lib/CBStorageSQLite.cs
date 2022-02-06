@@ -23,9 +23,9 @@ namespace OpenCacao.CacaoBeacon
 
         private CBContext _context;
 
-        public static CBStorageSQLite Create( bool reset = false)
+        public static CBStorageSQLite Create(bool reset = false)
         {
-            if ( reset == false )
+            if (reset == false)
             {
                 var context = new CBContext();
                 context.Migrate();
@@ -41,15 +41,16 @@ namespace OpenCacao.CacaoBeacon
                 return o;
             }
         }
-        protected CBStorageSQLite() {
-            
+        protected CBStorageSQLite()
+        {
+
         }
         /// <summary>
         /// ストレージを消去してリセットする
         /// </summary>
         public override void Reset()
         {
-            if ( _context != null )
+            if (_context != null)
             {
                 _context.Dispose();
                 _context = null;
@@ -73,7 +74,7 @@ namespace OpenCacao.CacaoBeacon
         /// ひとつのRPIを追加する
         /// </summary>
         /// <param name="rpi"></param>
-        public override void Add( RPI rpi )
+        public override void Add(RotatingProximityIdentifier rpi)
         {
             _context.RPI.Add(rpi);
             _context.SaveChanges();
@@ -82,9 +83,9 @@ namespace OpenCacao.CacaoBeacon
         /// 複数のRPIを追加する
         /// </summary>
         /// <param name="rpis"></param>
-        public override void AddRange(List<RPI> rpis)
+        public override void AddRange(List<RotatingProximityIdentifier> rpis)
         {
-            foreach ( var it in rpis )
+            foreach (var it in rpis)
             {
                 _context.Add(it);
             }
@@ -94,21 +95,21 @@ namespace OpenCacao.CacaoBeacon
         /// RPIを更新する
         /// </summary>
         /// <param name="rpi"></param>
-        public override void Update(RPI rpi)
+        public override void Update(RotatingProximityIdentifier rpi)
         {
             var item = _context.RPI.FirstOrDefault(t => t.Key.SequenceEqual(rpi.Key));
             if (item == null) return;
             item.EndTime = rpi.EndTime;
-            item.RSSI_max = rpi.RSSI_max;
-            item.RSSI_min = rpi.RSSI_min;
+            item.RssiMax = rpi.RssiMax;
+            item.RssiMin = rpi.RssiMin;
             _context.SaveChanges();
         }
 
-        public override List<RPI> RPI
+        public override List<RotatingProximityIdentifier> RPI
         {
             get
             {
-                var items = new List<RPI>();
+                var items = new List<RotatingProximityIdentifier>();
                 foreach (var it in _context.RPI.ToList())
                 {
                     items.Add(it);
@@ -116,6 +117,11 @@ namespace OpenCacao.CacaoBeacon
                 return items;
             }
         }
+
+        // マイグレーション
+        // Add-Migration Initial
+        // Update-Database
+
 
 
         public class CBContext : DbContext
@@ -125,76 +131,49 @@ namespace OpenCacao.CacaoBeacon
 #if __ANDROID__
             string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "/" + PATH_DB;
 #else
-            string path = PATH_DB;
+                string path = PATH_DB;
 #endif
                 optionsBuilder.UseSqlite($"Data Source={path}");
             }
-            
+            public DbSet<RotatingProximityIdentifier> RPI => Set<RotatingProximityIdentifier>();
+            public DbSet<TemporaryExposureKey> TEK => Set<TemporaryExposureKey>();
+            public DbSet<ExportRotatingProximityIdentifier> EXRPI => Set<ExportRotatingProximityIdentifier>();
+
             protected override void OnModelCreating(ModelBuilder modelBuilder)
             {
-                base.OnModelCreating(modelBuilder);
-
-                /// RPI,TEKのテーブルを自動作成する
-                MigrationBuilder migrationBuilder = new MigrationBuilder(this.Database.ProviderName);
-                migrationBuilder.CreateTable(
-                    name: "RPI",
-                    columns: table => new
-                    {
-                        Id = table.Column<int>(type: "INTEGER", nullable: false)
-                            .Annotation("Sqlite:Autoincrement", true),
-                        Key = table.Column<byte[]>(type: "BLOB", nullable: true),
-                        Metadata = table.Column<byte[]>(type: "BLOB", nullable: true),
-                        StartTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                        EndTime = table.Column<DateTime>(type: "TEXT", nullable: false),
-                        RSSI_min = table.Column<short>(type: "INTEGER", nullable: false),
-                        RSSI_max = table.Column<short>(type: "INTEGER", nullable: false),
-                        MAC = table.Column<ulong>(type: "INTEGER", nullable: false)
-                    },
-                    constraints: table =>
-                    {
-                        table.PrimaryKey("PK_RPI", x => x.Id);
-                    });
-
-                migrationBuilder.CreateTable(
-                    name: "TEK",
-                    columns: table => new
-                    {
-                        Id = table.Column<int>(type: "INTEGER", nullable: false)
-                            .Annotation("Sqlite:Autoincrement", true),
-                        Key = table.Column<byte[]>(type: "BLOB", nullable: true),
-                        RollingStartIntervalNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                        TransmissionRiskLevel = table.Column<int>(type: "INTEGER", nullable: false),
-                        RollingPeriod = table.Column<int>(type: "INTEGER", nullable: false),
-                        Date = table.Column<DateTime>(type: "TEXT", nullable: false)
-                    },
-                    constraints: table =>
-                    {
-                        table.PrimaryKey("PK_TEK", x => x.Id);
-                    });
+                modelBuilder.Entity<RotatingProximityIdentifier>().ToTable("RPI");
+                modelBuilder.Entity<TemporaryExposureKey>().ToTable("TEK");
+                modelBuilder.Entity<ExportRotatingProximityIdentifier>().ToTable("EXRPI");
             }
-            public DbSet<RPI> RPI => Set<RPI>();
-            public DbSet<TEK> TEK => Set<TEK>();
 
             public void Migrate()
             {
-#if __ANDROID__
                 var SQL = @"
 CREATE TABLE RPI (
     Id INTEGER NOT NULL CONSTRAINT PK_RPI PRIMARY KEY AUTOINCREMENT,
-    Key BLOB NOT NULL,
-    Metadata BLOB NOT NULL,
+    Key BLOB NULL,
+    Metadata BLOB NULL,
     StartTime TEXT NOT NULL,
     EndTime TEXT NOT NULL,
-    RSSI_min INTEGER NOT NULL,
-    RSSI_max INTEGER NOT NULL,
+    RssiMin INTEGER NOT NULL,
+    RssiMax INTEGER NOT NULL,
     MAC INTEGER NOT NULL
 );
-CREATE TABLE TEK(
+CREATE TABLE TEK (
     Id INTEGER NOT NULL CONSTRAINT PK_TEK PRIMARY KEY AUTOINCREMENT,
-    Key BLOB NOT NULL,
+    Key BLOB NULL,
     RollingStartIntervalNumber INTEGER NOT NULL,
     TransmissionRiskLevel INTEGER NOT NULL,
-    RollingPeriod INTEGER NOT NULL
+    RollingPeriod INTEGER NOT NULL,
+    Date TEXT NOT NULL
+);
+CREATE TABLE EXRPI (
+    Id INTEGER NOT NULL CONSTRAINT PK_EXRPI PRIMARY KEY AUTOINCREMENT,
+    TEK BLOB NULL,
+    RPI BLOB NULL,
+    RollingStartIntervalNumber INTEGER NOT NULL,
+    StartDate TEXT NOT NULL,
+    RpiDate TEXT NOT NULL
 );
 ";
                 try
@@ -203,9 +182,6 @@ CREATE TABLE TEK(
                 } catch { 
                     // 既に作成済みの場合はエラーを無視する
                 }
-#else
-                this.Database.Migrate();
-#endif
             }
         }
     }

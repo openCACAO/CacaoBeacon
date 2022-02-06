@@ -110,9 +110,9 @@ namespace BeaconMonitor
                             {
                                 _dispatcher.Invoke(() => {
                                     // 更新
-                                    item2.EndTime = item.EndTime;
-                                    item2.RSSI_max = item.RSSI_max;
-                                    item2.RSSI_min = item.RSSI_min;
+                                    item2.EndTime = item.EndTime.DateTime;
+                                    item2.RSSI_max = item.RssiMax;
+                                    item2.RSSI_min = item.RssiMin;
                                 });
                             }
                         }
@@ -137,15 +137,15 @@ namespace BeaconMonitor
             public int RSSI_max { get => _RSSI_max; set => SetProperty(ref _RSSI_max, value, nameof(RSSI_max)); }
             public string MAC { get => _MAC; set => SetProperty(ref _MAC, value, nameof(MAC)); }
 
-            public static _RPI FromRPI(RPI rpi)
+            public static _RPI FromRPI(RotatingProximityIdentifier rpi)
             {
                 return new _RPI()
                 {
                     Key = rpi.ToKeyString(),
-                    StartTime = rpi.StartTime,
-                    EndTime = rpi.EndTime,
-                    RSSI_min = rpi.RSSI_min,
-                    RSSI_max = rpi.RSSI_max,
+                    StartTime = rpi.StartTime.DateTime,
+                    EndTime = rpi.EndTime.DateTime,
+                    RSSI_min = rpi.RssiMin,
+                    RSSI_max = rpi.RssiMax,
                     MAC = rpi.toMacString()
                 };
             }

@@ -9,7 +9,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace OpenCacao.CacaoBeacon {
+namespace OpenCacao.CacaoBeacon.Proto {
 
   /// <summary>Holder for reflection information generated from tek.proto</summary>
   public static partial class TekReflection {
@@ -45,15 +45,15 @@ namespace OpenCacao.CacaoBeacon {
             "IQoKc2lnbmF0dXJlcxgBIAMoCzINLlRFS1NpZ25hdHVyZSJwCgxURUtTaWdu",
             "YXR1cmUSJgoOc2lnbmF0dXJlX2luZm8YASABKAsyDi5TaWduYXR1cmVJbmZv",
             "EhEKCWJhdGNoX251bRgCIAEoBRISCgpiYXRjaF9zaXplGAMgASgFEhEKCXNp",
-            "Z25hdHVyZRgEIAEoDEIYqgIVT3BlbkNhY2FvLkNhY2FvQmVhY29u"));
+            "Z25hdHVyZRgEIAEoDEIeqgIbT3BlbkNhY2FvLkNhY2FvQmVhY29uLlByb3Rv"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.TemporaryExposureKeyExport), global::OpenCacao.CacaoBeacon.TemporaryExposureKeyExport.Parser, new[]{ "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize", "SignatureInfos", "Keys", "RevisedKeys" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.SignatureInfo), global::OpenCacao.CacaoBeacon.SignatureInfo.Parser, new[]{ "VerificationKeyVersion", "VerificationKeyId", "SignatureAlgorithm" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.TemporaryExposureKey), global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Parser, new[]{ "KeyData", "TransmissionRiskLevel", "RollingStartIntervalNumber", "RollingPeriod", "ReportType", "DaysSinceOnsetOfSymptoms" }, null, new[]{ typeof(global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Types.ReportType) }, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.TEKSignatureList), global::OpenCacao.CacaoBeacon.TEKSignatureList.Parser, new[]{ "Signatures" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.TEKSignature), global::OpenCacao.CacaoBeacon.TEKSignature.Parser, new[]{ "SignatureInfo", "BatchNum", "BatchSize", "Signature" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKeyExport), global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKeyExport.Parser, new[]{ "StartTimestamp", "EndTimestamp", "Region", "BatchNum", "BatchSize", "SignatureInfos", "Keys", "RevisedKeys" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.Proto.SignatureInfo), global::OpenCacao.CacaoBeacon.Proto.SignatureInfo.Parser, new[]{ "VerificationKeyVersion", "VerificationKeyId", "SignatureAlgorithm" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey), global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Parser, new[]{ "KeyData", "TransmissionRiskLevel", "RollingStartIntervalNumber", "RollingPeriod", "ReportType", "DaysSinceOnsetOfSymptoms" }, null, new[]{ typeof(global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Types.ReportType) }, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.Proto.TEKSignatureList), global::OpenCacao.CacaoBeacon.Proto.TEKSignatureList.Parser, new[]{ "Signatures" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenCacao.CacaoBeacon.Proto.TEKSignature), global::OpenCacao.CacaoBeacon.Proto.TEKSignature.Parser, new[]{ "SignatureInfo", "BatchNum", "BatchSize", "Signature" }, null, null, null, null)
           }));
     }
     #endregion
@@ -75,7 +75,7 @@ namespace OpenCacao.CacaoBeacon {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::OpenCacao.CacaoBeacon.TekReflection.Descriptor.MessageTypes[0]; }
+      get { return global::OpenCacao.CacaoBeacon.Proto.TekReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -259,23 +259,23 @@ namespace OpenCacao.CacaoBeacon {
 
     /// <summary>Field number for the "signature_infos" field.</summary>
     public const int SignatureInfosFieldNumber = 6;
-    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.SignatureInfo> _repeated_signatureInfos_codec
-        = pb::FieldCodec.ForMessage(50, global::OpenCacao.CacaoBeacon.SignatureInfo.Parser);
-    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.SignatureInfo> signatureInfos_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.SignatureInfo>();
+    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.Proto.SignatureInfo> _repeated_signatureInfos_codec
+        = pb::FieldCodec.ForMessage(50, global::OpenCacao.CacaoBeacon.Proto.SignatureInfo.Parser);
+    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.SignatureInfo> signatureInfos_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.SignatureInfo>();
     /// <summary>
     /// Information about associated signatures
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.SignatureInfo> SignatureInfos {
+    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.SignatureInfo> SignatureInfos {
       get { return signatureInfos_; }
     }
 
     /// <summary>Field number for the "keys" field.</summary>
     public const int KeysFieldNumber = 7;
-    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.TemporaryExposureKey> _repeated_keys_codec
-        = pb::FieldCodec.ForMessage(58, global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Parser);
-    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TemporaryExposureKey> keys_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TemporaryExposureKey>();
+    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey> _repeated_keys_codec
+        = pb::FieldCodec.ForMessage(58, global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Parser);
+    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey> keys_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey>();
     /// <summary>
     /// The TemporaryExposureKeys for initial release of keys.
     /// Keys should be included in this list for initial release,
@@ -283,15 +283,15 @@ namespace OpenCacao.CacaoBeacon {
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TemporaryExposureKey> Keys {
+    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey> Keys {
       get { return keys_; }
     }
 
     /// <summary>Field number for the "revised_keys" field.</summary>
     public const int RevisedKeysFieldNumber = 8;
-    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.TemporaryExposureKey> _repeated_revisedKeys_codec
-        = pb::FieldCodec.ForMessage(66, global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Parser);
-    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TemporaryExposureKey> revisedKeys_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TemporaryExposureKey>();
+    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey> _repeated_revisedKeys_codec
+        = pb::FieldCodec.ForMessage(66, global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Parser);
+    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey> revisedKeys_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey>();
     /// <summary>
     /// TemporaryExposureKeys that have changed status.
     /// Keys should be included in this list if they have changed status
@@ -299,7 +299,7 @@ namespace OpenCacao.CacaoBeacon {
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TemporaryExposureKey> RevisedKeys {
+    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey> RevisedKeys {
       get { return revisedKeys_; }
     }
 
@@ -588,7 +588,7 @@ namespace OpenCacao.CacaoBeacon {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::OpenCacao.CacaoBeacon.TekReflection.Descriptor.MessageTypes[1]; }
+      get { return global::OpenCacao.CacaoBeacon.Proto.TekReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -908,7 +908,7 @@ namespace OpenCacao.CacaoBeacon {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::OpenCacao.CacaoBeacon.TekReflection.Descriptor.MessageTypes[2]; }
+      get { return global::OpenCacao.CacaoBeacon.Proto.TekReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1068,15 +1068,15 @@ namespace OpenCacao.CacaoBeacon {
 
     /// <summary>Field number for the "report_type" field.</summary>
     public const int ReportTypeFieldNumber = 5;
-    private readonly static global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Types.ReportType ReportTypeDefaultValue = global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Types.ReportType.Unknown;
+    private readonly static global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Types.ReportType ReportTypeDefaultValue = global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Types.ReportType.Unknown;
 
-    private global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Types.ReportType reportType_;
+    private global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Types.ReportType reportType_;
     /// <summary>
     /// Type of diagnosis associated with a key.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Types.ReportType ReportType {
+    public global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Types.ReportType ReportType {
       get { if ((_hasBits0 & 8) != 0) { return reportType_; } else { return ReportTypeDefaultValue; } }
       set {
         _hasBits0 |= 8;
@@ -1327,7 +1327,7 @@ namespace OpenCacao.CacaoBeacon {
             break;
           }
           case 40: {
-            ReportType = (global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Types.ReportType) input.ReadEnum();
+            ReportType = (global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Types.ReportType) input.ReadEnum();
             break;
           }
           case 48: {
@@ -1366,7 +1366,7 @@ namespace OpenCacao.CacaoBeacon {
             break;
           }
           case 40: {
-            ReportType = (global::OpenCacao.CacaoBeacon.TemporaryExposureKey.Types.ReportType) input.ReadEnum();
+            ReportType = (global::OpenCacao.CacaoBeacon.Proto.TemporaryExposureKey.Types.ReportType) input.ReadEnum();
             break;
           }
           case 48: {
@@ -1423,7 +1423,7 @@ namespace OpenCacao.CacaoBeacon {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::OpenCacao.CacaoBeacon.TekReflection.Descriptor.MessageTypes[3]; }
+      get { return global::OpenCacao.CacaoBeacon.Proto.TekReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1455,12 +1455,12 @@ namespace OpenCacao.CacaoBeacon {
 
     /// <summary>Field number for the "signatures" field.</summary>
     public const int SignaturesFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.TEKSignature> _repeated_signatures_codec
-        = pb::FieldCodec.ForMessage(10, global::OpenCacao.CacaoBeacon.TEKSignature.Parser);
-    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TEKSignature> signatures_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TEKSignature>();
+    private static readonly pb::FieldCodec<global::OpenCacao.CacaoBeacon.Proto.TEKSignature> _repeated_signatures_codec
+        = pb::FieldCodec.ForMessage(10, global::OpenCacao.CacaoBeacon.Proto.TEKSignature.Parser);
+    private readonly pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TEKSignature> signatures_ = new pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TEKSignature>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.TEKSignature> Signatures {
+    public pbc::RepeatedField<global::OpenCacao.CacaoBeacon.Proto.TEKSignature> Signatures {
       get { return signatures_; }
     }
 
@@ -1602,7 +1602,7 @@ namespace OpenCacao.CacaoBeacon {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::OpenCacao.CacaoBeacon.TekReflection.Descriptor.MessageTypes[4]; }
+      get { return global::OpenCacao.CacaoBeacon.Proto.TekReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1638,13 +1638,13 @@ namespace OpenCacao.CacaoBeacon {
 
     /// <summary>Field number for the "signature_info" field.</summary>
     public const int SignatureInfoFieldNumber = 1;
-    private global::OpenCacao.CacaoBeacon.SignatureInfo signatureInfo_;
+    private global::OpenCacao.CacaoBeacon.Proto.SignatureInfo signatureInfo_;
     /// <summary>
     /// Info about the signing key, version, algorithm, and so on.
     /// </summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     [global::System.CodeDom.Compiler.GeneratedCode("protoc", null)]
-    public global::OpenCacao.CacaoBeacon.SignatureInfo SignatureInfo {
+    public global::OpenCacao.CacaoBeacon.Proto.SignatureInfo SignatureInfo {
       get { return signatureInfo_; }
       set {
         signatureInfo_ = value;
@@ -1863,7 +1863,7 @@ namespace OpenCacao.CacaoBeacon {
       }
       if (other.signatureInfo_ != null) {
         if (signatureInfo_ == null) {
-          SignatureInfo = new global::OpenCacao.CacaoBeacon.SignatureInfo();
+          SignatureInfo = new global::OpenCacao.CacaoBeacon.Proto.SignatureInfo();
         }
         SignatureInfo.MergeFrom(other.SignatureInfo);
       }
@@ -1893,7 +1893,7 @@ namespace OpenCacao.CacaoBeacon {
             break;
           case 10: {
             if (signatureInfo_ == null) {
-              SignatureInfo = new global::OpenCacao.CacaoBeacon.SignatureInfo();
+              SignatureInfo = new global::OpenCacao.CacaoBeacon.Proto.SignatureInfo();
             }
             input.ReadMessage(SignatureInfo);
             break;
@@ -1927,7 +1927,7 @@ namespace OpenCacao.CacaoBeacon {
             break;
           case 10: {
             if (signatureInfo_ == null) {
-              SignatureInfo = new global::OpenCacao.CacaoBeacon.SignatureInfo();
+              SignatureInfo = new global::OpenCacao.CacaoBeacon.Proto.SignatureInfo();
             }
             input.ReadMessage(SignatureInfo);
             break;

@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using OpenCacao.CacaoBeacon;
 
-namespace OpenCacao.CacaoBeacon.Migrations
+namespace migratesqlite.Migrations
 {
     [DbContext(typeof(CBStorageSQLite.CBContext))]
-    [Migration("20211001064934_Initial")]
+    [Migration("20211011064113_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -18,31 +18,61 @@ namespace OpenCacao.CacaoBeacon.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.10");
 
-            modelBuilder.Entity("OpenCacao.CacaoBeacon.RPI", b =>
+            modelBuilder.Entity("OpenCacao.CacaoBeacon.ExportRotatingProximityIdentifier", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("EndTime")
+                    b.Property<byte[]>("RPI")
+                        .HasMaxLength(16)
+                        .HasColumnType("BLOB");
+
+                    b.Property<int>("RollingStartIntervalNumber")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("RpiDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("StartDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("TEK")
+                        .HasMaxLength(16)
+                        .HasColumnType("BLOB");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EXRPI");
+                });
+
+            modelBuilder.Entity("OpenCacao.CacaoBeacon.RotatingProximityIdentifier", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTimeOffset>("EndTime")
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("Key")
+                        .HasMaxLength(16)
                         .HasColumnType("BLOB");
 
                     b.Property<ulong>("MAC")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte[]>("Metadata")
+                        .HasMaxLength(4)
                         .HasColumnType("BLOB");
 
-                    b.Property<short>("RSSI_max")
+                    b.Property<short>("RssiMax")
                         .HasColumnType("INTEGER");
 
-                    b.Property<short>("RSSI_min")
+                    b.Property<short>("RssiMin")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("StartTime")
+                    b.Property<DateTimeOffset>("StartTime")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -50,7 +80,7 @@ namespace OpenCacao.CacaoBeacon.Migrations
                     b.ToTable("RPI");
                 });
 
-            modelBuilder.Entity("OpenCacao.CacaoBeacon.TEK", b =>
+            modelBuilder.Entity("OpenCacao.CacaoBeacon.TemporaryExposureKey", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -60,6 +90,7 @@ namespace OpenCacao.CacaoBeacon.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<byte[]>("Key")
+                        .HasMaxLength(16)
                         .HasColumnType("BLOB");
 
                     b.Property<int>("RollingPeriod")

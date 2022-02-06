@@ -14,8 +14,8 @@ namespace OpenCacao.CacaoBeacon
         {
             optionsBuilder.UseSqlServer(@"Data Source=(local);Initial Catalog=cacaodb;Integrated Security=True");
         }
-        public DbSet<TEK> TEK => Set<TEK>();
-        public DbSet<RPI> RPI => Set<RPI>();
-        public DbSet<EXRPI> EXRPI => Set<EXRPI>();
+        public DbSet<TemporaryExposureKey> TEK => Set<TemporaryExposureKey>();
+        public DbSet<RotatingProximityIdentifier> RPI => Set<RotatingProximityIdentifier>();
+        public DbSet<ExportRotatingProximityIdentifier> EXRPI => Set<ExportRotatingProximityIdentifier>();
     }
 }

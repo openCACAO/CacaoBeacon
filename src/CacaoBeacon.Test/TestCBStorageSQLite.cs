@@ -26,14 +26,14 @@ namespace CacaoBeacon.Test
         public void TestSaveRPIs()
         {
             var stroage = CBStorageSQLite.Create(true);
-            var rpi = new RPI()
+            var rpi = new RotatingProximityIdentifier()
             {
                 Key = new byte[] { 1, 2, 3, 4 },
                 StartTime = new DateTime(2021, 1, 1, 0, 0, 0),
                 EndTime = new DateTime(2021, 1, 1, 0, 1, 0),
                 MAC = 1,
-                RSSI_max = -10,
-                RSSI_min = -20,
+                RssiMax = -10,
+                RssiMin = -20,
             };
             stroage.Add(rpi);
 
@@ -49,12 +49,12 @@ namespace CacaoBeacon.Test
         public void TestSaveRPIs2()
         {
             var stroage = CBStorageSQLite.Create(true);
-            var rpis = new List<RPI> {
-                new RPI()
+            var rpis = new List<RotatingProximityIdentifier> {
+                new RotatingProximityIdentifier()
                 {
                     Key = new byte[] {1,1,1 },
                 },
-                new RPI()
+                new RotatingProximityIdentifier()
                 {
                     Key = new byte[] {2,2,2 },
                 },
@@ -66,10 +66,10 @@ namespace CacaoBeacon.Test
             Assert.NotNull(items);
             Assert.Equal(2, items.Count);
             
-            var rpis2 = new List<RPI> {
-                new RPI() { Key = new byte[] {3,3,3 }, },
-                new RPI() { Key = new byte[] {4,4,4 }, },
-                new RPI() { Key = new byte[] {5,5,5, }, },
+            var rpis2 = new List<RotatingProximityIdentifier> {
+                new RotatingProximityIdentifier() { Key = new byte[] {3,3,3 }, },
+                new RotatingProximityIdentifier() { Key = new byte[] {4,4,4 }, },
+                new RotatingProximityIdentifier() { Key = new byte[] {5,5,5, }, },
             };
 
             stroage.AddRange(rpis2);
